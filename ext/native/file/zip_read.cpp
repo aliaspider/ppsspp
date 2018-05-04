@@ -335,11 +335,12 @@ void VFSShutdown() {
 static bool IsLocalPath(const char *path) {
 	bool isUnixLocal = path[0] == '/';
 #ifdef _WIN32
-	bool isWindowsLocal = isalpha(path[0]) && path[1] == ':';
+	return isUnixLocal || (isalpha(path[0]) && path[1] == ':');
+#elif defined(__wiiu__)
+	return isUnixLocal || !strcmp(path, "sd:/") || !strcmp(path, "usb:/");
 #else
-	bool isWindowsLocal = false;
+	return isUnixLocal;
 #endif
-	return isUnixLocal || isWindowsLocal;
 }
 
 uint8_t *VFSReadFile(const char *filename, size_t *size) {

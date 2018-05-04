@@ -442,6 +442,8 @@ UI::EventReturn GameBrowser::HomeClick(UI::EventParams &e) {
 		return UI::EVENT_DONE;
 	path_.SetPath(folder);
 #endif
+#elif defined(__wiiu__)
+	path_.SetPath("/");
 #else
 	path_.SetPath(getenv("HOME"));
 #endif

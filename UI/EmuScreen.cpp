@@ -213,6 +213,11 @@ void EmuScreen::bootGame(const std::string &filename) {
 		coreParam.gpuCore = GPUCORE_VULKAN;
 		break;
 #endif
+#ifdef __wiiu__
+	case GPUBackend::GX2:
+		coreParam.gpuCore = GPUCORE_NULL;
+		break;
+#endif
 	}
 	if (g_Config.bSoftwareRendering) {
 		coreParam.gpuCore = GPUCORE_SOFTWARE;
@@ -1259,7 +1264,7 @@ void EmuScreen::renderUI() {
 		DrawFPS(draw2d, ctx->GetBounds());
 	}
 
-#if !PPSSPP_PLATFORM(UWP)
+#if !PPSSPP_PLATFORM(UWP) && !defined(NO_VULKAN)
 	if (g_Config.iGPUBackend == (int)GPUBackend::VULKAN && g_Config.bShowAllocatorDebug) {
 		DrawAllocatorVis(ctx, gpu);
 	}

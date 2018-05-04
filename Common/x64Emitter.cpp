@@ -23,7 +23,9 @@
 #include "MemoryUtil.h"
 #include "MsgHandler.h"
 
+#ifndef PRIx64
 #define PRIx64 "llx"
+#endif
 
 // Minimize the diff against Dolphin
 #define DYNA_REC JIT

@@ -788,6 +788,8 @@ const std::string &GetExeDirectory()
 				*(last_slash + 1) = '\0';
 			ExePath = program_path;
 		}
+#elif defined(__wiiu__)
+		ExePath = "sd:/ppsspp/";
 #endif
 	}
 

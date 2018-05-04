@@ -21,6 +21,9 @@ struct ID3D11Device1;
 struct ID3D11DeviceContext1;
 
 #endif
+#ifdef __wiiu__
+#include <wiiu/gx2/surface.h>
+#endif
 
 class VulkanContext;
 
@@ -34,5 +37,9 @@ DrawContext *T3DCreateD3D11Context(ID3D11Device *device, ID3D11DeviceContext *co
 #endif
 
 DrawContext *T3DCreateVulkanContext(VulkanContext *context, bool split);
+
+#ifdef __wiiu__
+DrawContext *T3DCreateGX2Context(GX2ContextState *context_state, GX2ColorBuffer* color_buffer, GX2DepthBuffer *depth_buffer);
+#endif
 
 }  // namespace Draw

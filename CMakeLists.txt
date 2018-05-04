@@ -159,23 +159,25 @@ endif()
 
 include_directories(ext/native)
 
-if(NOT OPENGL_LIBRARIES AND USING_GLES2)
-	set(OPENGL_LIBRARIES GLESv2)
-endif()
-
-if(USING_EGL)
-	if(NOT EGL_LIBRARIES)
-		set(EGL_LIBRARIES EGL)
+if(NOT WIIU)
+	if(NOT OPENGL_LIBRARIES AND USING_GLES2)
+		set(OPENGL_LIBRARIES GLESv2)
 	endif()
-	set(OPENGL_LIBRARIES ${OPENGL_LIBRARIES} ${EGL_LIBRARIES})
-endif()
 
-if(NOT OPENGL_LIBRARIES)
-	find_package(OpenGL REQUIRED)
-endif()
+	if(USING_EGL)
+		if(NOT EGL_LIBRARIES)
+			set(EGL_LIBRARIES EGL)
+		endif()
+		set(OPENGL_LIBRARIES ${OPENGL_LIBRARIES} ${EGL_LIBRARIES})
+	endif()
 
-find_package(SDL2)
-include(FindThreads)
+	if(NOT OPENGL_LIBRARIES)
+		find_package(OpenGL REQUIRED)
+	endif()
+	find_package(SDL2)
+
+	include(FindThreads)
+endif()
 
 if(APPLE)
 	find_library(COCOA_LIBRARY Cocoa)
@@ -369,19 +371,21 @@ set(CommonWindows
 	Common/stdafx.h)
 source_group(Windows FILES ${CommonWindows})
 
-set(CommonVulkan ${CommonExtra}
-	Common/Vulkan/SPIRVDisasm.cpp
-	Common/Vulkan/SPIRVDisasm.h
-	Common/Vulkan/VulkanContext.cpp
-	Common/Vulkan/VulkanContext.h
-	Common/Vulkan/VulkanDebug.cpp
-	Common/Vulkan/VulkanDebug.h
-	Common/Vulkan/VulkanImage.cpp
-	Common/Vulkan/VulkanImage.h
-	Common/Vulkan/VulkanLoader.cpp
-	Common/Vulkan/VulkanLoader.h
-	Common/Vulkan/VulkanMemory.cpp
-	Common/Vulkan/VulkanMemory.h)
+if(NOT WIIU)
+	set(CommonVulkan ${CommonExtra}
+		Common/Vulkan/SPIRVDisasm.cpp
+		Common/Vulkan/SPIRVDisasm.h
+		Common/Vulkan/VulkanContext.cpp
+		Common/Vulkan/VulkanContext.h
+		Common/Vulkan/VulkanDebug.cpp
+		Common/Vulkan/VulkanDebug.h
+		Common/Vulkan/VulkanImage.cpp
+		Common/Vulkan/VulkanImage.h
+		Common/Vulkan/VulkanLoader.cpp
+		Common/Vulkan/VulkanLoader.h
+		Common/Vulkan/VulkanMemory.cpp
+		Common/Vulkan/VulkanMemory.h)
+endif()
 
 add_library(Common STATIC
 	${CommonX86}
@@ -414,6 +418,7 @@ add_library(Common STATIC
 	Common/MemArenaDarwin.cpp
 	Common/MemArenaPosix.cpp
 	Common/MemArenaWin32.cpp
+	Common/MemArenaWiiU.cpp
 	Common/MemArena.h
 	Common/MemoryUtil.cpp
 	Common/MemoryUtil.h
@@ -487,6 +492,8 @@ if(USE_FFMPEG)
         set(PLATFORM_ARCH "ios/universal")
       elseif(MACOSX)
         set(PLATFORM_ARCH "macosx/x86_64")
+      elseif(WIIU)
+        set(PLATFORM_ARCH "wiiu")
       elseif(LINUX)
         if(ARMV7)
           set(PLATFORM_ARCH "linux/armv7")
@@ -745,6 +752,16 @@ elseif(IOS)
 
 
 	set(TargetBin PPSSPP)
+elseif(WIIU)
+	set(nativeExtra ${nativeExtra}
+		WiiU/WiiUHost.h
+		WiiU/WiiUHost.cpp
+      WiiU/WiiUMain.cpp
+      WiiU/GX2GraphicsContext.h
+      WiiU/GX2GraphicsContext.cpp
+      )
+   set(nativeExtraLibs ${nativeExtraLibs} wiiu fat iosuhax)
+   set(TargetBin PPSSPP)
 elseif(USING_QT_UI)
     set(CMAKE_AUTOMOC ON)
     find_package(Qt5 COMPONENTS OpenGL Gui Core)
@@ -874,21 +891,27 @@ if(ANDROID)
 	set(nativeExtra ${nativeExtra} ${NativeAppSource})
 endif()
 
-set(THIN3D_PLATFORMS ext/native/thin3d/thin3d_gl.cpp
-	ext/native/thin3d/GLRenderManager.cpp
-	ext/native/thin3d/GLRenderManager.h
-	ext/native/thin3d/GLQueueRunner.cpp
-	ext/native/thin3d/GLQueueRunner.h
-	ext/native/thin3d/DataFormatGL.cpp
-	ext/native/thin3d/DataFormatGL.h)
+if(WIIU)
+	set(THIN3D_PLATFORMS ext/native/thin3d/thin3d_gx2.cpp
+		ext/native/thin3d/GX2Shaders.c
+		)
+else()
+	set(THIN3D_PLATFORMS ext/native/thin3d/thin3d_gl.cpp
+		ext/native/thin3d/GLRenderManager.cpp
+		ext/native/thin3d/GLRenderManager.h
+		ext/native/thin3d/GLQueueRunner.cpp
+		ext/native/thin3d/GLQueueRunner.h
+		ext/native/thin3d/DataFormatGL.cpp
+		ext/native/thin3d/DataFormatGL.h)
 
-set(THIN3D_PLATFORMS ${THIN3D_PLATFORMS}
-	ext/native/thin3d/thin3d_vulkan.cpp
-	ext/native/thin3d/VulkanRenderManager.cpp
-	ext/native/thin3d/VulkanRenderManager.h
-	ext/native/thin3d/VulkanQueueRunner.cpp
-	ext/native/thin3d/VulkanQueueRunner.h
-	ext/native/thin3d/DataFormat.h)
+	set(THIN3D_PLATFORMS ${THIN3D_PLATFORMS}
+		ext/native/thin3d/thin3d_vulkan.cpp
+		ext/native/thin3d/VulkanRenderManager.cpp
+		ext/native/thin3d/VulkanRenderManager.h
+		ext/native/thin3d/VulkanQueueRunner.cpp
+		ext/native/thin3d/VulkanQueueRunner.h
+		ext/native/thin3d/DataFormat.h)
+endif()
 
 if(WIN32)
   set(THIN3D_PLATFORMS ${THIN3D_PLATFORMS}
@@ -898,6 +921,35 @@ if(WIN32)
     ext/native/thin3d/d3dx9_loader.h
     ext/native/thin3d/d3d11_loader.cpp
     ext/native/thin3d/d3d11_loader.h)
+endif()
+
+set(nativeExtra ${nativeExtra}
+ext/native/gfx_es2/draw_buffer.cpp
+ext/native/gfx_es2/draw_buffer.h
+ext/native/gfx_es2/draw_text.cpp
+ext/native/gfx_es2/draw_text.h
+ext/native/gfx_es2/gpu_features.cpp
+ext/native/gfx_es2/gpu_features.h)
+
+if(NOT WIIU)
+	set(nativeExtra ${nativeExtra}
+	ext/native/gfx/gl_common.h
+	ext/native/gfx/gl_debug_log.cpp
+	ext/native/gfx/gl_debug_log.h
+	ext/native/gfx/d3d9_shader.cpp
+	ext/native/gfx/d3d9_shader.h
+	ext/native/gfx/d3d9_state.cpp
+	ext/native/gfx/d3d9_state.h
+	ext/native/gfx_es2/draw_text_win.cpp
+	ext/native/gfx_es2/draw_text_win.h
+	ext/native/gfx_es2/draw_text_qt.cpp
+	ext/native/gfx_es2/draw_text_qt.h
+	ext/native/gfx_es2/draw_text_android.cpp
+	ext/native/gfx_es2/draw_text_android.h
+	ext/native/gfx_es2/glsl_program.cpp
+	ext/native/gfx_es2/glsl_program.h
+	ext/native/gfx_es2/gl3stub.c
+	ext/native/gfx_es2/gl3stub.h)
 endif()
 
 add_library(native STATIC
@@ -938,31 +990,8 @@ add_library(native STATIC
 	ext/native/file/vfs.h
 	ext/native/file/zip_read.cpp
 	ext/native/file/zip_read.h
-	ext/native/gfx/gl_common.h
-	ext/native/gfx/gl_debug_log.cpp
-	ext/native/gfx/gl_debug_log.h
 	ext/native/gfx/texture_atlas.cpp
 	ext/native/gfx/texture_atlas.h
-	ext/native/gfx/d3d9_shader.cpp
-	ext/native/gfx/d3d9_shader.h
-	ext/native/gfx/d3d9_state.cpp
-	ext/native/gfx/d3d9_state.h
-	ext/native/gfx_es2/draw_buffer.cpp
-	ext/native/gfx_es2/draw_buffer.h
-	ext/native/gfx_es2/draw_text.cpp
-	ext/native/gfx_es2/draw_text.h
-	ext/native/gfx_es2/draw_text_win.cpp
-	ext/native/gfx_es2/draw_text_win.h
-	ext/native/gfx_es2/draw_text_qt.cpp
-	ext/native/gfx_es2/draw_text_qt.h
-	ext/native/gfx_es2/draw_text_android.cpp
-	ext/native/gfx_es2/draw_text_android.h
-	ext/native/gfx_es2/gpu_features.cpp
-	ext/native/gfx_es2/gpu_features.h
-	ext/native/gfx_es2/glsl_program.cpp
-	ext/native/gfx_es2/glsl_program.h
-	ext/native/gfx_es2/gl3stub.c
-	ext/native/gfx_es2/gl3stub.h
 	ext/native/i18n/i18n.cpp
 	ext/native/i18n/i18n.h
 	ext/native/image/png_load.cpp
@@ -1194,6 +1223,8 @@ list(APPEND CoreExtra
 list(APPEND CoreExtra
 	Core/MIPS/MIPS/MipsJit.cpp
 	Core/MIPS/MIPS/MipsJit.h
+	Core/MIPS/fake/FakeJit.cpp
+	Core/MIPS/fake/FakeJit.h
 	GPU/Common/VertexDecoderFake.cpp
 )
 
@@ -1315,8 +1346,22 @@ set(GPU_D3D11
 	GPU/D3D11/VertexShaderGeneratorD3D11.h
 )
 
-# We build Vulkan even on Apple to avoid annoying build differences.
-set(GPU_IMPLS ${GPU_GLES} ${GPU_VULKAN})
+if(NOT WIIU)
+	# We build Vulkan even on Apple to avoid annoying build differences.
+	set(GPU_IMPLS ${GPU_GLES} ${GPU_VULKAN})
+	set(GPU_SHADERS
+		GPU/Common/DepalettizeShaderCommon.cpp
+		GPU/Common/DepalettizeShaderCommon.h
+		GPU/Common/ShaderId.cpp
+		GPU/Common/ShaderId.h
+		GPU/Common/ShaderUniforms.cpp
+		GPU/Common/ShaderUniforms.h
+		GPU/Common/ShaderCommon.cpp
+		GPU/Common/ShaderCommon.h
+		GPU/Common/ShaderTranslation.cpp
+		GPU/Common/ShaderTranslation.h
+		)
+endif()
 if(WIN32)
 	list(APPEND GPU_IMPLS ${GPU_D3D9} ${GPU_D3D11})
 endif()
@@ -1327,8 +1372,7 @@ endif()
 set(GPU_SOURCES
 	${GPU_IMPLS}
 	${GPU_NEON}
-	GPU/Common/DepalettizeShaderCommon.cpp
-	GPU/Common/DepalettizeShaderCommon.h
+	${GPU_SHADERS}
 	GPU/Common/FramebufferCommon.cpp
 	GPU/Common/FramebufferCommon.h
 	GPU/Common/GPUDebugInterface.cpp
@@ -1337,14 +1381,6 @@ set(GPU_SOURCES
 	GPU/Common/GPUStateUtils.h
 	GPU/Common/DrawEngineCommon.cpp
 	GPU/Common/DrawEngineCommon.h
-	GPU/Common/ShaderId.cpp
-	GPU/Common/ShaderId.h
-	GPU/Common/ShaderUniforms.cpp
-	GPU/Common/ShaderUniforms.h
-	GPU/Common/ShaderCommon.cpp
-	GPU/Common/ShaderCommon.h
-	GPU/Common/ShaderTranslation.cpp
-	GPU/Common/ShaderTranslation.h
 	GPU/Common/SplineCommon.cpp
 	GPU/Common/SplineCommon.h
 	GPU/Common/StencilCommon.cpp
@@ -1712,7 +1748,9 @@ if(ANDROID)
   endif()
 endif()
 
-set(CoreExtraLibs ${CoreExtraLibs} armips)
+if(NOT WIIU)
+   set(CoreExtraLibs ${CoreExtraLibs} armips)
+endif()
 
 # needed for VK_USE_PLATFORM_XCB_KHR only
 #if(VULKAN AND NOT WIN32)
@@ -1720,7 +1758,11 @@ set(CoreExtraLibs ${CoreExtraLibs} armips)
 #endif()
 
 
-set(GlslangLibs glslang OGLCompiler OSDependent SPIRV SPVRemapper spirv-cross-glsl)
+if(WIIU)
+   set(CMAKE_DL_LIBS "")
+else()
+   set(GlslangLibs glslang OGLCompiler OSDependent SPIRV SPVRemapper spirv-cross-glsl)
+endif()
 
 if(WIN32)
    set(GlslangLibs ${GlslangLibs} spirv-cross-hlsl)
@@ -1986,4 +2028,8 @@ if(IOS)
         XCODE_ATTRIBUTE_ENABLE_BITCODE NO
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "-"
 	)
+endif()
+
+if(WIIU)
+	add_rpx_target(${TargetBin})
 endif()

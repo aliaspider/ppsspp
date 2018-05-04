@@ -36,6 +36,11 @@
 #include <mach/vm_param.h>
 #endif
 
+#ifdef __wiiu__
+#include <wiiu/os/memory.h>
+#include <malloc.h>
+#endif
+
 #ifndef _WIN32
 #include <unistd.h>
 #endif
@@ -45,6 +50,8 @@ static int hint_location;
 #elif defined(_WIN32)
 static SYSTEM_INFO sys_info;
 #define MEM_PAGE_SIZE (uintptr_t)(sys_info.dwPageSize)
+#elif defined(__wiiu__)
+#define MEM_PAGE_SIZE OS_MMAP_PAGE_SIZE
 #else
 #define MEM_PAGE_SIZE (getpagesize())
 #endif
@@ -68,7 +75,14 @@ static uint32_t ConvertProtFlagsWin32(uint32_t flags) {
 	}
 	return protect;
 }
-
+#elif defined(__wiiu__)
+static uint32_t ConvertProtFlagsWiiU(uint32_t flags) {
+	if (flags & (MEM_PROT_READ | MEM_PROT_WRITE))
+		return OS_MMAP_RW;
+	if (flags & MEM_PROT_READ)
+		return OS_MMAP_RO;
+	return OS_MMAP_INVALID;
+}
 #else
 
 static uint32_t ConvertProtFlagsUnix(uint32_t flags) {
@@ -155,6 +169,8 @@ void *AllocateExecutableMemory(size_t size) {
 		ptr = VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, prot);
 #endif
 	}
+#elif defined(__wiiu__)
+	void *ptr = malloc(size);
 #else
 	static char *map_hint = 0;
 #if defined(_M_X64) && !defined(MAP_32BIT)
@@ -185,7 +201,7 @@ void *AllocateExecutableMemory(size_t size) {
 
 #endif /* defined(_WIN32) */
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__wiiu__)
 	static const void *failed_result = MAP_FAILED;
 #else
 	static const void *failed_result = nullptr;
@@ -224,6 +240,8 @@ void *AllocateMemoryPages(size_t size, uint32_t memProtFlags) {
 #endif
 	if (!ptr)
 		PanicAlert("Failed to allocate raw memory");
+#elif defined(__wiiu__)
+	void* ptr = malloc(size);
 #else
 	uint32_t protect = ConvertProtFlagsUnix(memProtFlags);
 	void *ptr = mmap(0, size, protect, MAP_ANON | MAP_PRIVATE, -1, 0);
@@ -243,7 +261,7 @@ void *AllocateAlignedMemory(size_t size, size_t alignment) {
 	void* ptr =  _aligned_malloc(size,alignment);
 #else
 	void* ptr = NULL;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__wiiu__)
 	ptr = memalign(alignment, size);
 #else
 	if (posix_memalign(&ptr, alignment, size) != 0)
@@ -268,6 +286,8 @@ void FreeMemoryPages(void *ptr, size_t size) {
 #ifdef _WIN32
 	if (!VirtualFree(ptr, 0, MEM_RELEASE))
 		PanicAlert("FreeMemoryPages failed!\n%s", GetLastErrorMsg());
+#elif defined(__wiiu__)
+	free(ptr);
 #else
 	munmap(ptr, size);
 #endif
@@ -322,6 +342,8 @@ bool ProtectMemoryPages(const void* ptr, size_t size, uint32_t memProtFlags) {
 		return false;
 	}
 #endif
+	return true;
+#elif defined(__wiiu__)
 	return true;
 #else
 	uint32_t protect = ConvertProtFlagsUnix(memProtFlags);

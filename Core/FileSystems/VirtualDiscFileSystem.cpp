@@ -35,7 +35,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#ifndef __wiiu__
 #include <dlfcn.h>
+#endif
 #endif
 
 const std::string INDEX_FILENAME = ".ppsspp-index.lst";
@@ -809,6 +811,7 @@ void VirtualDiscFileSystem::HandlerLogger(void *arg, HandlerHandle handle, LogTy
 }
 
 VirtualDiscFileSystem::Handler::Handler(const char *filename, VirtualDiscFileSystem *const sys) {
+#ifndef __wiiu__
 #ifdef _WIN32
 #if PPSSPP_PLATFORM(UWP)
 #define dlopen(name, ignore) (void *)LoadPackagedLibrary(ConvertUTF8ToWString(name).c_str(), 0)
@@ -847,17 +850,19 @@ VirtualDiscFileSystem::Handler::Handler(const char *filename, VirtualDiscFileSys
 #undef dlsym
 #undef dlclose
 #endif
+#endif
 }
 
 VirtualDiscFileSystem::Handler::~Handler() {
 	if (library != NULL) {
 		Shutdown();
-
+#ifndef __wiiu__
 #if !PPSSPP_PLATFORM(UWP)
 #ifdef _WIN32
 		FreeLibrary((HMODULE)library);
 #else
 		dlclose(library);
+#endif
 #endif
 #endif
 	}

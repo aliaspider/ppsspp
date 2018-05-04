@@ -346,6 +346,9 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 #elif defined(IOS)
 	g_Config.memStickDirectory = user_data_path;
 	g_Config.flash0Directory = std::string(external_dir) + "/flash0/";
+#elif defined(__wiiu__)
+	g_Config.memStickDirectory = "sd:/ppsspp/";
+	g_Config.flash0Directory = "sd:/ppsspp/assets/flash0/";
 #elif !defined(_WIN32)
 	std::string config;
 	if (getenv("XDG_CONFIG_HOME") != NULL)
@@ -488,7 +491,7 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 	if (g_Config.currentDirectory == "") {
 #if defined(__ANDROID__)
 		g_Config.currentDirectory = external_dir;
-#elif defined(IOS) || defined(_WIN32)
+#elif defined(IOS) || defined(_WIN32) || defined(__wiiu__)
 		g_Config.currentDirectory = savegame_dir;
 #else
 		if (getenv("HOME") != NULL)
@@ -834,6 +837,7 @@ void NativeRender(GraphicsContext *graphicsContext) {
 		translation.setTranslation(Vec3(-0.5f * g_dpi_scale_x / g_dpi_scale_real_x, -0.5f * g_dpi_scale_y / g_dpi_scale_real_y, 0.0f));
 		ortho = translation * ortho;
 		break;
+	case GPUBackend::GX2:
 	case GPUBackend::DIRECT3D11:
 		ortho.setOrthoD3D(0.0f, xres, yres, 0.0f, -1.0f, 1.0f);
 		break;

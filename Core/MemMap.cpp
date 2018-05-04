@@ -160,8 +160,8 @@ static bool Memory_TryBase(u32 flags) {
 		*view.out_ptr = (u8*)g_arena.CreateView(
 			position, view.size, base + view.virtual_address);
 		if (!*view.out_ptr) {
-			goto bail;
 			DEBUG_LOG(MEMMAP, "Failed at view %d", i);
+			goto bail;
 		}
 #else
 		if (CanIgnoreView(view)) {
@@ -220,7 +220,7 @@ bool MemoryMap_Setup(u32 flags) {
 #if !PPSSPP_PLATFORM(ANDROID)
 	if (g_arena.NeedsProbing()) {
 		int base_attempts = 0;
-#if defined(_WIN32) && PPSSPP_ARCH(32BIT)
+#if PPSSPP_ARCH(32BIT)
 		// Try a whole range of possible bases. Return once we got a valid one.
 		uintptr_t max_base_addr = 0x7FFF0000 - 0x10000000;
 		uintptr_t min_base_addr = 0x01000000;
@@ -285,7 +285,9 @@ void Init() {
 			views[i].size = std::min(std::max((int)g_MemorySize - MAX_MMAP_SIZE * 2, 0), MAX_MMAP_SIZE);
 	}
 	int flags = 0;
-	MemoryMap_Setup(flags);
+	if(!MemoryMap_Setup(flags)) {
+		_assert_msg_(MEMMAP, 0, "MemoryMap_Setup: Failed.");
+	}
 
 	INFO_LOG(MEMMAP, "Memory system initialized. Base at %p (RAM at @ %p, uncached @ %p)",
 		base, m_pPhysicalRAM, m_pUncachedRAM);

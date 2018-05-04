@@ -5,7 +5,7 @@
 #include "base/logging.h"
 #include "base/stringutil.h"
 
-#if !PPSSPP_PLATFORM(UWP)
+#if !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(WIIU)
 #include "gfx/gl_common.h"
 
 #if defined(_WIN32)
@@ -89,7 +89,7 @@ void ProcessGPUFeatures() {
 
 void CheckGLExtensions() {
 
-#if !PPSSPP_PLATFORM(UWP)
+#if !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(WIIU)
 
 	// Make sure to only do this once. It's okay to call CheckGLExtensions from wherever.
 	if (extensionsDone)
@@ -500,7 +500,7 @@ static const char *glsl_fragment_prelude =
 "#endif\n";
 
 std::string ApplyGLSLPrelude(const std::string &source, uint32_t stage) {
-#if !PPSSPP_PLATFORM(UWP)
+#if !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(WIIU)
 	std::string temp;
 	std::string version = "";
 	if (!gl_extensions.IsGLES && gl_extensions.IsCoreContext) {

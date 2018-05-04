@@ -26,7 +26,9 @@
 #if PPSSPP_PLATFORM(UWP)
 #include "GPU/D3D11/GPU_D3D11.h"
 #else
+#ifndef __wiiu__
 #include "GPU/GLES/GPU_GLES.h"
+#endif
 
 #ifndef NO_VULKAN
 #include "GPU/Vulkan/GPU_Vulkan.h"
@@ -71,8 +73,12 @@ bool GPU_Init(GraphicsContext *ctx, Draw::DrawContext *draw) {
 		SetGPU(new NullGPU());
 		break;
 	case GPUCORE_GLES:
+#ifndef __wiiu__
 		SetGPU(new GPU_GLES(ctx, draw));
 		break;
+#else
+		return false;
+#endif
 	case GPUCORE_SOFTWARE:
 		SetGPU(new SoftGPU(ctx, draw));
 		break;
