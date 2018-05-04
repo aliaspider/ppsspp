@@ -948,8 +948,8 @@ static int sceFontFindOptimumFont(u32 libHandle, u32 fontStylePtr, u32 errorCode
 	auto requestedStyle = PSPPointer<const PGFFontStyle>::Create(fontStylePtr);
 
 	// Find the first nearest match for H/V, OR the last exact match for others.
-	float hRes = requestedStyle->fontHRes > 0.0f ? requestedStyle->fontHRes : fontLib->FontHRes();
-	float vRes = requestedStyle->fontVRes > 0.0f ? requestedStyle->fontVRes : fontLib->FontVRes();
+	float hRes = requestedStyle->fontHRes > 0.0f ? (float)requestedStyle->fontHRes : fontLib->FontHRes();
+	float vRes = requestedStyle->fontVRes > 0.0f ? (float)requestedStyle->fontVRes : fontLib->FontVRes();
 	Font *optimumFont = 0;
 	Font *nearestFont = 0;
 	float nearestDist = std::numeric_limits<float>::infinity();
@@ -1015,8 +1015,8 @@ static int sceFontFindFont(u32 libHandle, u32 fontStylePtr, u32 errorCodePtr) {
 	auto requestedStyle = PSPPointer<const PGFFontStyle>::Create(fontStylePtr);
 
 	// Find the closest exact match for the fields specified.
-	float hRes = requestedStyle->fontHRes > 0.0f ? requestedStyle->fontHRes : fontLib->FontHRes();
-	float vRes = requestedStyle->fontVRes > 0.0f ? requestedStyle->fontVRes : fontLib->FontVRes();
+	float hRes = requestedStyle->fontHRes > 0.0f ? (float)requestedStyle->fontHRes : fontLib->FontHRes();
+	float vRes = requestedStyle->fontVRes > 0.0f ? (float)requestedStyle->fontVRes : fontLib->FontVRes();
 	for (size_t i = 0; i < internalFonts.size(); i++) {
 		if (internalFonts[i]->MatchesStyle(*requestedStyle) != MATCH_NONE) {
 			auto matchStyle = internalFonts[i]->GetFontStyle();

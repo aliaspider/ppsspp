@@ -73,6 +73,10 @@ inline unsigned short bswap16(unsigned short x) { return _byteswap_ushort(x); }
 #define bswap32 swap32
 #define bswap64 swap64
 # endif
+#elif defined(__GNUC__)
+#define bswap16 __builtin_bswap16
+#define bswap32 __builtin_bswap32
+#define bswap64 __builtin_bswap64
 #else
 // TODO: speedup
 inline unsigned short bswap16(unsigned short x) { return (x << 8) | (x >> 8); }
@@ -127,8 +131,10 @@ public:
 		return *this;
 	}
 
+	//	 those seem to cause "ambigous overload" errors
+#if 0
 	operator unsigned long() const { return (unsigned long)swap(); }
-	operator long() const { return (long)swap(); }	
+	operator long() const { return (long)swap(); }
 	operator s8() const { return (s8)swap(); }
 	operator u8() const { return (u8)swap(); }
 	operator s16() const { return (s16)swap(); }
@@ -139,6 +145,9 @@ public:
 	operator u64() const { return (u64)swap(); }
 	operator float() const { return (float)swap(); }
 	operator double() const { return (double)swap(); }
+#else
+	operator T() const { return swap(); }
+#endif
 
 	// +v
 	swapped_t operator +() const {
@@ -304,10 +313,12 @@ public:
 	swapped_t operator &(const swapped_t &b) const {
 		return swap() & b.swap();
 	}
+#if 0
 	template <typename S>
 	swapped_t operator &(const S &b) const {
 		return swap() & b;
 	}
+#endif
 	swapped_t& operator &=(const swapped_t &b) {
 		value = swap(swap() & b.swap());
 		return *this;
@@ -318,6 +329,7 @@ public:
 		return *this;
 	}
 
+#if 0
 	swapped_t operator |(const swapped_t &b) const {
 		return swap() | b.swap();
 	}
@@ -325,6 +337,7 @@ public:
 	swapped_t operator |(const S &b) const {
 		return swap() | b;
 	}
+#endif
 	swapped_t& operator |=(const swapped_t &b) {
 		value = swap(swap() | b.swap());
 		return *this;

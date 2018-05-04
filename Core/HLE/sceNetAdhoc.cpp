@@ -914,7 +914,7 @@ static int sceNetAdhocctlGetScanInfo(u32 sizeAddr, u32 bufAddr) {
 	SceNetAdhocctlScanInfoEmu *buf = NULL;
 	if (Memory::IsValidAddress(bufAddr)) buf = (SceNetAdhocctlScanInfoEmu *)Memory::GetPointer(bufAddr);
 
-	INFO_LOG(SCENET, "sceNetAdhocctlGetScanInfo([%08x]=%i, %08x)", sizeAddr, buflen ? *buflen : -1, bufAddr);
+	INFO_LOG(SCENET, "sceNetAdhocctlGetScanInfo([%08x]=%i, %08x)", sizeAddr, buflen ? (s32)*buflen : -1, bufAddr);
 	if (!g_Config.bEnableWlan) {
 		return 0;
 	}
@@ -3482,7 +3482,7 @@ void __NetTriggerCallbacks()
 
 			for (std::map<int, AdhocctlHandler>::iterator it = adhocctlHandlers.begin(); it != adhocctlHandlers.end(); ++it) {
 				args[2] = it->second.argument;
-				__KernelDirectMipsCall(it->second.entryPoint, NULL, args, 3, true);
+				__KernelDirectMipsCall(it->second.entryPoint, NULL, (u32*)args, 3, true);
 			}
 		}
 		adhocctlEvents.clear();
@@ -3492,7 +3492,7 @@ void __NetTriggerCallbacks()
 			u32_le *args = (u32_le *) param;
 			AfterMatchingMipsCall *after = (AfterMatchingMipsCall *) __KernelCreateAction(actionAfterMatchingMipsCall);
 			after->SetContextID(args[0], args[1]);
-			__KernelDirectMipsCall(args[5], after, args, 5, true);
+			__KernelDirectMipsCall(args[5], after, (u32*)args, 5, true);
 		}
 		matchingEvents.clear();
 	}
@@ -3566,7 +3566,7 @@ static int sceNetAdhocctlGetPeerList(u32 sizeAddr, u32 bufAddr) {
 	SceNetAdhocctlPeerInfoEmu *buf = NULL;
 	if (Memory::IsValidAddress(bufAddr)) buf = (SceNetAdhocctlPeerInfoEmu *)Memory::GetPointer(bufAddr);
 
-	DEBUG_LOG(SCENET, "sceNetAdhocctlGetPeerList([%08x]=%i, %08x) at %08x", sizeAddr, buflen ? *buflen : -1, bufAddr, currentMIPS->pc);
+	DEBUG_LOG(SCENET, "sceNetAdhocctlGetPeerList([%08x]=%i, %08x) at %08x", sizeAddr, buflen ? (s32)*buflen : -1, bufAddr, currentMIPS->pc);
 	if (!g_Config.bEnableWlan) {
 		return -1;
 	}
@@ -3643,7 +3643,7 @@ static int sceNetAdhocctlGetAddrByName(const char *nickName, u32 sizeAddr, u32 b
 	s32_le *buflen = NULL; //int32_t
 	if (Memory::IsValidAddress(sizeAddr)) buflen = (s32_le *)Memory::GetPointer(sizeAddr);
 	
-	WARN_LOG(SCENET, "UNTESTED sceNetAdhocctlGetPeerList(%s, [%08x]=%i, %08x)", nickName, sizeAddr, buflen ? *buflen : -1, bufAddr);
+	WARN_LOG(SCENET, "UNTESTED sceNetAdhocctlGetPeerList(%s, [%08x]=%i, %08x)", nickName, sizeAddr, buflen ? (s32)*buflen : -1, bufAddr);
 	
 	// Library initialized
 	if (netAdhocctlInited)

@@ -59,12 +59,12 @@ typedef struct
 #ifdef _MSC_VER
 } PSP_Header;
 #else
-} __attribute__((packed)) PSP_Header;
+} PSP_Header;
 #endif
 
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
-
+static_assert(sizeof(PSP_Header) == 0x150, "sizeof(PSP_Header) != 0x150");
 int pspDecryptPRX(const u8 *inbuf, u8 *outbuf, u32 size);
 

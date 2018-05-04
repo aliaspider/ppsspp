@@ -53,6 +53,10 @@ class PointerWrap;
 
 #ifdef _MSC_VER
 #define PACK  // on MSVC we use #pragma pack() instead so let's kill this.
+#elif defined(COMMON_BIG_ENDIAN)
+// packed cannot be used with non-POD *_le types.
+// TODO: find a real solution for the couple of structs that actually need this
+#define PACK
 #else
 #define PACK __attribute__((packed))
 #endif

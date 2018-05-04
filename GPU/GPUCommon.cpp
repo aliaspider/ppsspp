@@ -635,7 +635,7 @@ u32 GPUCommon::EnqueueList(u32 listpc, u32 stall, int subIntrBase, PSPPointer<Ps
 
 	int id = -1;
 	u64 currentTicks = CoreTiming::GetTicks();
-	u32_le stackAddr = args.IsValid() ? args->stackAddr : 0;
+	u32_le stackAddr = args.IsValid() ? (u32)args->stackAddr : 0;
 	// Check compatibility
 	if (sceKernelGetCompiledSdkVersion() > 0x01FFFFFF) {
 		//numStacks = 0;

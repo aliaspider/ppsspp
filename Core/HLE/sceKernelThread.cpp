@@ -1995,7 +1995,7 @@ int __KernelStartThread(SceUID threadToStartID, int argSize, u32 argBlockPtr, bo
 		return error;
 
 	Thread *cur = __GetCurrentThread();
-	__KernelResetThread(startThread, cur ? cur->nt.currentPriority : 0);
+	__KernelResetThread(startThread, cur ? (s32)cur->nt.currentPriority : 0);
 
 	u32 &sp = startThread->context.r[MIPS_REG_SP];
 	// Force args means just use those as a0/a1 without any special treatment.

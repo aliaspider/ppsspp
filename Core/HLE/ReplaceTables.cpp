@@ -423,8 +423,8 @@ static int Replace_vmmul_q_transp() {
 // a1 = matrix
 // a2 = source address
 static int Replace_gta_dl_write_matrix() {
-	u32 *ptr = (u32 *)Memory::GetPointer(PARAM(0));
-	u32 *src = (u32_le *)Memory::GetPointer(PARAM(2));
+	u32_le *ptr = (u32_le *)Memory::GetPointer(PARAM(0));
+	u32_le *src = (u32_le *)Memory::GetPointer(PARAM(2));
 	u32 matrix = PARAM(1) << 24;
 
 	if (!ptr || !src) {
@@ -432,7 +432,7 @@ static int Replace_gta_dl_write_matrix() {
 		return 38;
 	}
 
-	u32 *dest = (u32_le *)Memory::GetPointer(ptr[0]);
+	u32_le *dest = (u32_le *)Memory::GetPointer(ptr[0]);
 	if (!dest) {
 		RETURN(0);
 		return 38;
