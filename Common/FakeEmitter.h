@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "Common.h"
+#include "CodeBlock.h"
 #include "MsgHandler.h"
 
 // VCVT flags
@@ -381,11 +382,11 @@ public:
 	}
 	virtual ~FakeXEmitter() {}
 
-	void SetCodePtr(u8 *ptr) {}
+	void SetCodePointer(u8 *ptr) {}
 	void ReserveCodeSpace(u32 bytes) {}
 	const u8 *AlignCode16() { return nullptr; }
 	const u8 *AlignCodePage() { return nullptr; }
-	const u8 *GetCodePtr() const { return nullptr; }
+	const u8 *GetCodePointer() const { return nullptr; }
 	void FlushIcache() {}
 	void FlushIcacheSection(u8 *start, u8 *end) {}
 	u8 *GetWritableCodePtr() { return nullptr; }
@@ -412,7 +413,7 @@ public:
 // Everything that needs to generate machine code should inherit from this.
 // You get memory management for free, plus, you can use all the MOV etc functions without
 // having to prefix them with gen-> or something similar.
-class FakeXCodeBlock : public FakeXEmitter
+class FakeXCodeBlock : public CodeBlock<FakeXEmitter>
 {
 protected:
 	u8 *region;
@@ -422,12 +423,14 @@ public:
 	FakeXCodeBlock() : region(NULL), region_size(0) {}
 	virtual ~FakeXCodeBlock() { if (region) FreeCodeSpace(); }
 
+	void PoisonMemory(int offset) override {}
+
 	// Call this before you generate any code.
 	void AllocCodeSpace(int size) { }
 
 	// Always clear code space with breakpoints, so that if someone accidentally executes
 	// uninitialized, it just breaks into the debugger.
-	void ClearCodeSpace() { }
+	void ClearCodeSpace(int offset = 0) { }
 
 	// Call this when shutting down. Don't rely on the destructor, even though it'll do the job.
 	void FreeCodeSpace() { }

@@ -76,6 +76,10 @@ void FakeJit::DoDummyState(PointerWrap &p)
 	}
 }
 
+void FakeJit::UpdateFCR31()
+{
+}
+
 void FakeJit::FlushAll()
 {
 	//gpr.FlushAll();
@@ -147,6 +151,12 @@ void FakeJit::Comp_RunBlock(MIPSOpcode op)
 	ERROR_LOG(JIT, "Comp_RunBlock should never be reached!");
 }
 
+void FakeJit::LinkBlock(u8 *exitPoint, const u8 *checkedEntry) {
+}
+
+void FakeJit::UnlinkBlock(u8 *checkedEntry, u32 originalAddress) {
+}
+
 bool FakeJit::ReplaceJalTo(u32 dest) {
 	return true;
 }
@@ -212,6 +222,16 @@ void FakeJit::WriteExitDestInR(FakeReg Reg)
 
 void FakeJit::WriteSyscallExit()
 {
+}
+
+MIPSOpcode FakeJit::GetOriginalOp(MIPSOpcode op) {
+	JitBlockCache *bc = GetBlockCache();
+	int block_num = bc->GetBlockNumberFromEmuHackOp(op, true);
+	if (block_num >= 0) {
+		return bc->GetOriginalFirstOp(block_num);
+	} else {
+		return op;
+	}
 }
 
 #define _RS ((op>>21) & 0x1F)
