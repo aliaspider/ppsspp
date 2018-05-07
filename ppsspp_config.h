@@ -76,7 +76,8 @@
 #endif
 
 #if defined(__PPC__)
-    #define PPSSPP_ARCH_PPC 1
+    // we can't use PPC here since it could be pre-defined by the compiler
+    #define PPSSPP_ARCH_POWERPC 1
     #define PPSSPP_ARCH_32BIT 1
 #endif
 

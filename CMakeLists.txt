@@ -40,6 +40,8 @@ if(CMAKE_SYSTEM_PROCESSOR)
 		set(X86 ON)
 	elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^mips")
 		set(MIPS ON)
+	elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^ppc" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "^powerpc")
+		set(PPC ON)
 	else()
     message("Unknown CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 	endif()
@@ -227,6 +229,9 @@ endif()
 if(ARM64)
 	message("Generating for ARMv8, ${CMAKE_BUILD_TYPE}")
 endif()
+if(PPC)
+	message("Generating for PowerPC, ${CMAKE_BUILD_TYPE}")
+endif()
 if(NOT MSVC)
 	if (ANDROID)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
@@ -359,7 +364,13 @@ set(CommonMIPS
 	Common/MipsEmitter.h)
 source_group(MIPS FILES ${CommonMIPS})
 
-if(NOT (X86 OR ARM OR MIPS))
+set(CommonPPC
+	Common/FakeCPUDetect.cpp
+	Common/ppcEmitter.cpp
+	Common/ppcEmitter.h)
+source_group(PPC FILES ${CommonPPC})
+
+if(NOT (X86 OR ARM OR MIPS OR PPC))
 	set(CommonFake
 		Common/FakeCPUDetect.cpp
 		Common/FakeEmitter.h)
@@ -392,6 +403,7 @@ add_library(Common STATIC
 	${CommonARM}
 	${CommonARM64}
 	${CommonMIPS}
+	${CommonPPC}
 	${CommonFake}
 	${CommonWindows}
 	${CommonVulkan}
@@ -1219,6 +1231,23 @@ list(APPEND CoreExtra
 	GPU/Common/VertexDecoderX86.cpp
 	GPU/Software/SamplerX86.cpp
 )
+
+list(APPEND CoreExtra
+	Core/MIPS/PPC/PpcAsm.cpp
+	Core/MIPS/PPC/PpcCompAlu.cpp
+	Core/MIPS/PPC/PpcCompBranch.cpp
+	Core/MIPS/PPC/PpcCompFpu.cpp
+	Core/MIPS/PPC/PpcCompLoadStore.cpp
+	Core/MIPS/PPC/PpcCompReplace.cpp
+	Core/MIPS/PPC/PpcCompVFPU.cpp
+	Core/MIPS/PPC/PpcJit.cpp
+	Core/MIPS/PPC/PpcJit.h
+	Core/MIPS/PPC/PpcRegCache.cpp
+	Core/MIPS/PPC/PpcRegCache.h
+	Core/MIPS/PPC/PpcRegCacheFPU.cpp
+	Core/MIPS/PPC/PpcRegCacheFPU.h
+	Core/MIPS/PPC/PpcRegCacheVPU.cpp
+	Core/MIPS/PPC/PpcRegCacheVPU.h)
 
 list(APPEND CoreExtra
 	Core/MIPS/MIPS/MipsJit.cpp

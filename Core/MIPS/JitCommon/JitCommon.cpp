@@ -38,6 +38,8 @@
 #include "../x86/Jit.h"
 #elif PPSSPP_ARCH(MIPS)
 #include "../MIPS/MipsJit.h"
+#elif defined(PPC)
+#include "../PPC/PpcJit.h"
 #else
 #include "../fake/FakeJit.h"
 #endif
@@ -67,7 +69,7 @@ namespace MIPSComp {
 		return new MIPSComp::ArmJit(mips);
 #elif PPSSPP_ARCH(ARM64)
 		return new MIPSComp::Arm64Jit(mips);
-#elif PPSSPP_ARCH(X86) || PPSSPP_ARCH(AMD64)
+#elif PPSSPP_ARCH(X86) || PPSSPP_ARCH(AMD64) || PPSSPP_ARCH(POWERPC)
 		return new MIPSComp::Jit(mips);
 #elif PPSSPP_ARCH(MIPS)
 		return new MIPSComp::MipsJit(mips);
