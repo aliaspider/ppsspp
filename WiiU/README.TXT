@@ -4,6 +4,9 @@
 first you need to build elf2rpl:
 make -C ext/wiiu/elf2rpl
 
+make sure you have the latest ppsspp-ffmpeg submodule:
+cd ffmpeg; git pull origin master
+
 then create a build directory, then navigate to it and run:
 cmake path/to/ppsspp -DCMAKE_TOOLCHAIN_FILE=path/to/ppsspp/cmake/Toolchains/wiiu.cmake
 
