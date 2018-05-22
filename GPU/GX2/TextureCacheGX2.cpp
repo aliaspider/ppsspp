@@ -600,7 +600,7 @@ void TextureCacheGX2::LoadTextureLevel(TexCacheEntry &entry, ReplacedTexture &re
 		switch(tfmt)
 		{
 		case GX2_SURFACE_FORMAT_UNORM_R4_G4_B4_A4:
-			texture->compMap = GX2_COMP_SEL(_b, _a, _r, _g);
+			texture->compMap = GX2_COMP_SEL(_r, _g, _b, _a);
 			break;
 		case GX2_SURFACE_FORMAT_UNORM_R5_G5_B5_A1:
 			texture->compMap = GX2_COMP_SEL(_r, _g, _b, _a);
@@ -610,7 +610,12 @@ void TextureCacheGX2::LoadTextureLevel(TexCacheEntry &entry, ReplacedTexture &re
 			break;
 		default:
 		case GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8:
-			texture->compMap = GX2_COMP_SEL(_r, _g, _b, _a);
+			if (dstFmt == GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8) {
+				texture->compMap = GX2_COMP_SEL(_r, _g, _b, _a);
+			} else {
+				// scaled 16-bit textures end up native-endian.
+				texture->compMap = GX2_COMP_SEL(_a, _b, _g, _r);
+			}
 			break;
 		}
 #if 0 // TODO: mipmapping

@@ -95,7 +95,7 @@ void convert5551_gl(u16* data, u32* out, int width, int l, int u) {
 }
 
 // convert 4444 image to 8888, parallelizable
-void convert4444_dx9(u16* data, u32* out, int width, int l, int u) {
+void convert4444_dx9(u16_le* data, u32* out, int width, int l, int u) {
 	for (int y = l; y < u; ++y) {
 		for (int x = 0; x < width; ++x) {
 			u32 val = data[y*width + x];
@@ -109,7 +109,7 @@ void convert4444_dx9(u16* data, u32* out, int width, int l, int u) {
 }
 
 // convert 565 image to 8888, parallelizable
-void convert565_dx9(u16* data, u32* out, int width, int l, int u) {
+void convert565_dx9(u16_le* data, u32* out, int width, int l, int u) {
 	for (int y = l; y < u; ++y) {
 		for (int x = 0; x < width; ++x) {
 			u32 val = data[y*width + x];
@@ -122,7 +122,7 @@ void convert565_dx9(u16* data, u32* out, int width, int l, int u) {
 }
 
 // convert 5551 image to 8888, parallelizable
-void convert5551_dx9(u16* data, u32* out, int width, int l, int u) {
+void convert5551_dx9(u16_le* data, u32* out, int width, int l, int u) {
 	for (int y = l; y < u; ++y) {
 		for (int x = 0; x < width; ++x) {
 			u32 val = data[y*width + x];

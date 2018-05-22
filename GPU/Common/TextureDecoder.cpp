@@ -575,7 +575,7 @@ CheckAlphaResult CheckAlphaRGBA8888Basic(const u32 *pixelData, int stride, int w
 #endif
 	}
 
-	const u32 *p = pixelData;
+	const u32_le *p = (u32_le *)pixelData;
 	for (int y = 0; y < h; ++y) {
 		u32 bits = 0xFF000000;
 		for (int i = 0; i < w; ++i) {
@@ -605,7 +605,7 @@ CheckAlphaResult CheckAlphaABGR4444Basic(const u32 *pixelData, int stride, int w
 #endif
 	}
 
-	const u32 *p = pixelData;
+	const u32_le *p = (u32_le *)pixelData;
 	const int w2 = (w + 1) / 2;
 	const int stride2 = (stride + 1) / 2;
 
@@ -638,7 +638,7 @@ CheckAlphaResult CheckAlphaABGR1555Basic(const u32 *pixelData, int stride, int w
 #endif
 	}
 
-	const u32 *p = pixelData;
+	const u32_le *p = (u32_le *)pixelData;
 	const int w2 = (w + 1) / 2;
 	const int stride2 = (stride + 1) / 2;
 
@@ -670,7 +670,7 @@ CheckAlphaResult CheckAlphaRGBA4444Basic(const u32 *pixelData, int stride, int w
 #endif
 	}
 
-	const u32 *p = pixelData;
+	const u32_le *p = (u32_le*)pixelData;
 	const int w2 = (w + 1) / 2;
 	const int stride2 = (stride + 1) / 2;
 
@@ -703,7 +703,7 @@ CheckAlphaResult CheckAlphaRGBA5551Basic(const u32 *pixelData, int stride, int w
 #endif
 	}
 
-	const u32 *p = pixelData;
+	const u32_le *p = (u32_le*)pixelData;
 	const int w2 = (w + 1) / 2;
 	const int stride2 = (stride + 1) / 2;
 

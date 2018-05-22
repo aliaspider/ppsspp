@@ -20,6 +20,7 @@
 #include "ppsspp_config.h"
 #include "CommonTypes.h"
 #include "ColorConvNEON.h"
+#include "Swap.h"
 
 void SetupColorConv();
 
@@ -101,9 +102,9 @@ inline u16 RGBA8888ToRGBA4444(u32 value) {
 void convert4444_gl(u16* data, u32* out, int width, int l, int u);
 void convert565_gl(u16* data, u32* out, int width, int l, int u);
 void convert5551_gl(u16* data, u32* out, int width, int l, int u);
-void convert4444_dx9(u16* data, u32* out, int width, int l, int u);
-void convert565_dx9(u16* data, u32* out, int width, int l, int u);
-void convert5551_dx9(u16* data, u32* out, int width, int l, int u);
+void convert4444_dx9(u16_le* data, u32* out, int width, int l, int u);
+void convert565_dx9(u16_le* data, u32* out, int width, int l, int u);
+void convert5551_dx9(u16_le* data, u32* out, int width, int l, int u);
 
 // "Complete" set of color conversion functions between the usual formats.
 

@@ -41,15 +41,15 @@ void TextureScalerGX2::ConvertTo8888(u32 format, u32* source, u32* &dest, int wi
 		break;
 
 	case GX2_SURFACE_FORMAT_UNORM_R4_G4_B4_A4:
-		GlobalThreadPool::Loop(std::bind(&convert4444_dx9, (u16*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
+		GlobalThreadPool::Loop(std::bind(&convert4444_dx9, (u16_le*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
 		break;
 
 	case GX2_SURFACE_FORMAT_UNORM_R5_G6_B5:
-		GlobalThreadPool::Loop(std::bind(&convert565_dx9, (u16*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
+		GlobalThreadPool::Loop(std::bind(&convert565_dx9, (u16_le*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
 		break;
 
 	case GX2_SURFACE_FORMAT_UNORM_R5_G5_B5_A1:
-		GlobalThreadPool::Loop(std::bind(&convert5551_dx9, (u16*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
+		GlobalThreadPool::Loop(std::bind(&convert5551_dx9, (u16_le*)source, dest, width, std::placeholders::_1, std::placeholders::_2), 0, height);
 		break;
 
 	default:
