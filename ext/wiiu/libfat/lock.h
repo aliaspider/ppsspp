@@ -31,7 +31,30 @@
 
 #include "common.h"
 
-#ifdef USE_LWP_LOCK
+#if defined(__wiiu__)
+
+static inline void _FAT_lock_init(mutex_t *mutex)
+{
+	OSInitMutex(mutex);
+}
+
+static inline void _FAT_lock_deinit(mutex_t *mutex)
+{
+	(void)mutex;
+	return;
+}
+
+static inline void _FAT_lock(mutex_t *mutex)
+{
+	OSLockMutex(mutex);
+}
+
+static inline void _FAT_unlock(mutex_t *mutex)
+{
+	OSUnlockMutex(mutex);
+}
+
+#elif defined(USE_LWP_LOCK)
 
 static inline void _FAT_lock_init(mutex_t *mutex)
 {
@@ -52,7 +75,6 @@ static inline void _FAT_unlock(mutex_t *mutex)
 {
 	LWP_MutexUnlock(*mutex);
 }
-
 #else
 
 // We still need a blank lock type

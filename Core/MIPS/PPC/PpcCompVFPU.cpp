@@ -1138,7 +1138,7 @@ namespace MIPSComp
 	}
 
 	void Jit::Comp_Viim(MIPSOpcode op) {
-		CONDITIONAL_DISABLE;
+		DISABLE;
 
 		u8 dreg;
 		GetVectorRegs(&dreg, V_Single, _VT);

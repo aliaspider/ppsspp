@@ -6,6 +6,7 @@
 #include <wiiu/ios.h>
 #include <wiiu/os/thread.h>
 #include <wiiu/os/memory.h>
+#include <wiiu/os/debug.h>
 #include <wiiu/os/systeminfo.h>
 #include <wiiu/sysapp.h>
 #include <sys/socket.h>
@@ -45,7 +46,6 @@ __attribute__((weak)) void __fini(void) {
 void someFunc(void *arg) { (void)arg; }
 
 static int mcp_hook_fd = -1;
-uint32_t x;
 
 int MCPHookOpen(void) {
 	// take over mcp thread
@@ -56,7 +56,7 @@ int MCPHookOpen(void) {
 
 	IOS_IoctlAsync(mcp_hook_fd, 0x62, (void *)0, 0, (void *)0, 0, (void *)someFunc, (void *)0);
 	// let wupserver start up
-	OSSleepTicks(sec_to_ticks(1));
+	OSSleepTicks(ms_to_ticks(1));
 
 	if (IOSUHAX_Open("/dev/mcp") < 0) {
 		IOS_Close(mcp_hook_fd);
@@ -74,7 +74,7 @@ void MCPHookClose(void) {
 	// close down wupserver, return control to mcp
 	IOSUHAX_Close();
 	// wait for mcp to return
-	OSSleepTicks(sec_to_ticks(1));
+	OSSleepTicks(ms_to_ticks(1));
 	IOS_Close(mcp_hook_fd);
 	mcp_hook_fd = -1;
 }
@@ -89,7 +89,7 @@ static void fsdev_init(void) {
 		if (res < 0)
 			res = MCPHookOpen();
 
-		if (res == 0) {
+		if (res >= 0) {
 			iosuhaxMount = 1;
 			fatInitDefault();
 			return;
@@ -110,33 +110,35 @@ static void fsdev_exit(void) {
 		unmount_sd_fat("sd");
 }
 
-/* RPX entry point */
-__attribute__((noreturn)) void _start(int argc, char **argv) {
-	setup_os_exceptions();
-	memoryInitialize();
-	socket_lib_init();
-	wiiu_log_init();
-	fsdev_init();
-	__init();
-
-	main(argc, argv);
-
-	//   __fini();
+__attribute__((noreturn)) void __shutdown_program(void) {
 	fsdev_exit();
-	wiiu_log_deinit();
 	memoryRelease();
+	wiiu_log_deinit();
 	SYSRelaunchTitle(0, 0);
 	exit(0);
 }
 
+/* RPX entry point */
+__attribute__((noreturn)) void _start(int argc, char **argv) {
+	setup_os_exceptions();
+	socket_lib_init();
+	wiiu_log_init();
+	fsdev_init();
+	memoryInitialize();
+	DEBUG_VAR(iosuhaxMount);
+	DEBUG_VAR(mcp_hook_fd);
+	__init();
+	main(argc, argv);
+	//   __fini();
+
+	deinit_os_exceptions();
+	__shutdown_program();
+}
+
 __attribute__((noreturn)) void abort(void) {
 	printf("Abort called\n");
-#if 0
-	ProcUIShutdown();
-#endif
-	fsdev_exit();
-	wiiu_log_deinit();
-	memoryRelease();
-	SYSRelaunchTitle(0, 0);
-	exit(0);
+	DEBUG_VAR(MEM2_avail());
+	fflush(stdout);
+	*(u32*)0 = 0;
+	__shutdown_program();
 }

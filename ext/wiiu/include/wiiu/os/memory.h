@@ -42,12 +42,15 @@ void memoryRelease(void);
 
 void * MEM2_alloc(unsigned int size, unsigned int align);
 void MEM2_free(void *ptr);
+u32 MEM2_avail();
 
 void * MEM1_alloc(unsigned int size, unsigned int align);
 void MEM1_free(void *ptr);
+u32 MEM1_avail();
 
 void * MEMBucket_alloc(unsigned int size, unsigned int align);
 void MEMBucket_free(void *ptr);
+u32 MEMBucket_avail();
 
 #ifdef __cplusplus
 }

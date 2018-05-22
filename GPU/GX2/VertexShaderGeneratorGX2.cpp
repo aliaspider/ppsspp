@@ -82,7 +82,7 @@ void GenerateVertexShaderGX2(const VShaderID &id, GX2VertexShader *vs) {
 
 	emit_.END_OF_PROGRAM();
 #endif
-#if 1
+#if 0
 	DEBUG_STR(VertexShaderDesc(id).c_str());
 	char buffer[16384];
 	GenerateVulkanGLSLVertexShader(id, buffer);

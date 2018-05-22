@@ -23,11 +23,12 @@ extern "C" {
 
 #define SO_REUSEADDR    0x0004
 #define SO_NBIO         0x1014
+#define SO_BIO          0x1015
+#define SO_NONBLOCK     0x1016
 #define SO_SNDBUF       0x1001
 #define SO_RCVBUF       0x1002
 #define SO_SNDTIMEO     0 /* ? */
 #define SO_RCVTIMEO     0 /* ? */
-
 
 /* return codes */
 #define SO_SUCCESS      0

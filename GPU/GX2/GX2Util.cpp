@@ -34,7 +34,7 @@ void StockGX2::Init() {
 	GX2InitSampler(&samplerPoint2DWrap, GX2_TEX_CLAMP_MODE_WRAP, GX2_TEX_XY_FILTER_MODE_POINT);
 	GX2InitSampler(&samplerPoint2DClamp, GX2_TEX_CLAMP_MODE_CLAMP, GX2_TEX_XY_FILTER_MODE_POINT);
 	GX2InitSampler(&samplerLinear2DWrap, GX2_TEX_CLAMP_MODE_WRAP, GX2_TEX_XY_FILTER_MODE_LINEAR);
-	GX2InitSampler(&samplerLinear2DClamp, GX2_TEX_CLAMP_MODE_CLAMP, GX2_TEX_XY_FILTER_MODE_POINT);
+	GX2InitSampler(&samplerLinear2DClamp, GX2_TEX_CLAMP_MODE_CLAMP, GX2_TEX_XY_FILTER_MODE_LINEAR);
 
 	GX2InitSamplerBorderType(&samplerPoint2DWrap, GX2_TEX_BORDER_TYPE_WHITE);
 	GX2InitSamplerBorderType(&samplerPoint2DClamp, GX2_TEX_BORDER_TYPE_WHITE);

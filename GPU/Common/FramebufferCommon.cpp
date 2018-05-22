@@ -90,6 +90,10 @@ void CenterDisplayOutputRect(float *x, float *y, float *w, float *h, float origW
 		float origRatio = !rotated ? origW / origH : origH / origW;
 		float frameRatio = frameW / frameH;
 		
+		// assume aspect ratios are the same when they are close enough.
+		if(fabsf(frameRatio - origRatio) < 0.2)
+			origRatio = frameRatio;
+
 		if (origRatio > frameRatio) {
 			// Image is wider than frame. Center vertically.
 			outW = frameW;

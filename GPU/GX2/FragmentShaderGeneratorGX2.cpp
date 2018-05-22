@@ -78,7 +78,7 @@ void GenerateFragmentShaderGX2(const FShaderID &id, GX2PixelShader *ps) {
 	emit_.EXP_DONE_PIX(color);
 	emit_.END_OF_PROGRAM();
 #endif
-#if 1
+#if 0
 	DEBUG_STR(FragmentShaderDesc(id).c_str());
 	char buffer[16384];
 	GenerateVulkanGLSLFragmentShader(id, buffer);

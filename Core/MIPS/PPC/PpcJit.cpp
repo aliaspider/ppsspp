@@ -1,6 +1,7 @@
 #include "ppsspp_config.h"
 #if PPSSPP_ARCH(POWERPC)
 
+#include "profiler/profiler.h"
 #include "Common/ChunkFile.h"
 #include "Core/Core.h"
 #include "Core/CoreTiming.h"
@@ -56,6 +57,7 @@ void Jit::CompileDelaySlot(int flags)
 
 void Jit::Compile(u32 em_address)
 {
+	PROFILE_THIS_SCOPE("jitc");
 	if (GetSpaceLeft() < 0x10000 || blocks.IsFull())
 	{
 		ClearCache();
@@ -280,6 +282,7 @@ Jit::Jit(MIPSState *mips) : blocks(mips, this), gpr(mips, &jo),fpr(mips),mips_(m
 }
 
 void Jit::RunLoopUntil(u64 globalticks) {	
+	PROFILE_THIS_SCOPE("jit");
 #ifdef _XBOX
 	// force stack alinement
 	//_alloca(16*1024);

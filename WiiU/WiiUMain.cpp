@@ -12,6 +12,7 @@
 
 #include <wiiu/ios.h>
 
+#include "profiler/profiler.h"
 #include "base/NativeApp.h"
 #include "base/display.h"
 #include "Core/Core.h"
@@ -28,7 +29,9 @@ void System_SendMessage(const char *command, const char *parameter) {
 		Core_Stop();
 	}
 }
+
 int main(int argc, char **argv) {
+	PROFILE_INIT();
 
 	host = new WiiUHost();
 
@@ -69,11 +72,11 @@ int main(int argc, char **argv) {
 	g_Config.bEnableSound = true;
 	g_Config.bPauseExitsEmulator = false;
 	g_Config.bPauseMenuExitsEmulator = false;
-	//	g_Config.iCpuCore = (int)CPUCore::JIT;
-	//	g_Config.iCpuCore = (int)CPUCore::IR_JIT;
-	g_Config.iCpuCore = (int)CPUCore::INTERPRETER;
-	g_Config.bSoftwareRendering = true;
-
+	g_Config.iCpuCore = (int)CPUCore::JIT;
+	g_Config.bVertexDecoderJit = false;
+	g_Config.bSoftwareRendering = false;
+	g_Config.bFrameSkipUnthrottle = false;
+	g_Config.iFpsLimit = 0;
 	std::string error_string;
 	GraphicsContext *ctx;
 	host->InitGraphics(&error_string, &ctx);
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
 std::string System_GetProperty(SystemProperty prop) {
 	switch (prop) {
 	case SYSPROP_NAME:
-		return "WiiU";
+		return "Wii-U";
 	case SYSPROP_LANGREGION:
 		return "en_US";
 	default:
@@ -111,7 +114,7 @@ std::string System_GetProperty(SystemProperty prop) {
 int System_GetPropertyInt(SystemProperty prop) {
 	switch (prop) {
 	case SYSPROP_DISPLAY_REFRESH_RATE:
-		return 60000; // 59940 ?
+		return 60000; // internal refresh rate is always 59.940, even for PAL output.
 	case SYSPROP_DISPLAY_XRES:
 		return 854;
 	case SYSPROP_DISPLAY_YRES:

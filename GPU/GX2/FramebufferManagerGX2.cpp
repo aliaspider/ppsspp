@@ -15,6 +15,7 @@
 // Official git repository and contact information can be found at
 // https://github.com/hrydgard/ppsspp and http://www.ppsspp.org/.
 
+#include "profiler/profiler.h"
 #include "base/display.h"
 #include "math/lin/matrix4x4.h"
 #include "ext/native/thin3d/thin3d.h"
@@ -129,6 +130,7 @@ void FramebufferManagerGX2::CompilePostShader() {
 }
 
 void FramebufferManagerGX2::MakePixelTexture(const u8 *srcPixels, GEBufferFormat srcPixelFormat, int srcStride, int width, int height, float &u1, float &v1) {
+	PROFILE_THIS_SCOPE("make pixtex");
 	if (drawPixelsTex_.surface.image && (drawPixelsTex_.surface.width != width || drawPixelsTex_.surface.height != height)) {
 		MEM2_free(drawPixelsTex_.surface.image);
 		drawPixelsTex_ = {};
@@ -143,8 +145,8 @@ void FramebufferManagerGX2::MakePixelTexture(const u8 *srcPixels, GEBufferFormat
 		drawPixelsTex_.surface.use = GX2_SURFACE_USE_TEXTURE;
 		drawPixelsTex_.viewNumSlices = 1;
 
-		drawPixelsTex_.surface.format = GX2_SURFACE_FORMAT_UINT_R8_G8_B8_A8;
-		drawPixelsTex_.compMap = GX2_COMP_SEL(_a, _r, _g, _b);
+		drawPixelsTex_.surface.format = GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8;
+		drawPixelsTex_.compMap = GX2_COMP_SEL(_r, _g, _b, _a);
 
 		GX2CalcSurfaceSizeAndAlignment(&drawPixelsTex_.surface);
 		GX2InitTextureRegs(&drawPixelsTex_);
@@ -153,8 +155,8 @@ void FramebufferManagerGX2::MakePixelTexture(const u8 *srcPixels, GEBufferFormat
 		_assert_(drawPixelsTex_.surface.image);
 	}
 
+	u32_le *dst = (u32_le *)drawPixelsTex_.surface.image;
 	for (int y = 0; y < height; y++) {
-		u32_le *dst = (u32_le *)drawPixelsTex_.surface.image + drawPixelsTex_.surface.pitch * y;
 		if (srcPixelFormat != GE_FORMAT_8888) {
 			const u16_le *src = (const u16_le *)srcPixels + srcStride * y;
 			for (u32 x = 0; x < width; x++) {
@@ -168,6 +170,7 @@ void FramebufferManagerGX2::MakePixelTexture(const u8 *srcPixels, GEBufferFormat
 			const u32_le *src = (const u32_le *)srcPixels + srcStride * y;
 			memcpy(dst, src, width * sizeof(u32_le));
 		}
+		dst += drawPixelsTex_.surface.pitch;
 	}
 	GX2Invalidate(GX2_INVALIDATE_MODE_CPU_TEXTURE, drawPixelsTex_.surface.image, drawPixelsTex_.surface.imageSize);
 	GX2SetPixelTexture(&drawPixelsTex_, 0);
@@ -184,8 +187,6 @@ void FramebufferManagerGX2::DrawActiveTexture(float x, float y, float w, float h
 		{ { x + w, y + h, 0 }, u1, v1 },
 		{ { x, y + h, 0 }, u0, v1 },
 	};
-
-	static const short indices[4] = { 0, 1, 3, 2 };
 
 	if (uvRotation != ROTATION_LOCKED_HORIZONTAL) {
 		float temp[8];
@@ -225,6 +226,7 @@ void FramebufferManagerGX2::DrawActiveTexture(float x, float y, float w, float h
 	memcpy(quadBuffer_ + 5, coord + 1, sizeof(Coord));
 	memcpy(quadBuffer_ + 10, coord + 3, sizeof(Coord));
 	memcpy(quadBuffer_ + 15, coord + 2, sizeof(Coord));
+	GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, quadBuffer_, sizeof(coord));
 
 	GX2SetCullOnlyControl(GX2_FRONT_FACE_CCW, GX2_DISABLE, GX2_DISABLE);
 	GX2SetColorControlReg(&StockGX2::blendDisabledColorWrite);

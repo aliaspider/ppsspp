@@ -1,5 +1,6 @@
 #define GX2_DISABLE_WRAPS
 
+#include <math.h>
 #include <string.h>
 #include <wiiu/os/debug.h>
 #include <wiiu/gx2/validation_layer.h>
@@ -38,7 +39,12 @@ static inline const char *remove_path(const char *str) {
 	return slash ? (slash + 1) : str;
 }
 
-static bool dump_calls = true;
+// static bool dump_calls = true;
+static bool dump_calls = false;
+
+// static bool dump_data = true;
+static bool dump_data = false;
+
 static bool failed = false;
 
 static inline void dump_floats(const float *ptr, int count, int stride) {
@@ -50,9 +56,16 @@ static inline void dump_floats(const float *ptr, int count, int stride) {
 		count = 1;
 
 	for (int i = 0; i < count; i++) {
-		printf("(%f", *ptr++);
-		for (int j = 1; j < stride; j++) {
-			printf(", %f", *ptr++);
+		for (int j = 0; j < stride; j++) {
+			if(j == 0)
+				printf("(");
+			else
+				printf(", ");
+
+			if(fabsf(*ptr) < 100000.0f)
+				printf("%f", *ptr++);
+			else
+				printf("0x%08X", *(u32*)ptr++);
 		}
 		printf(")\n");
 	}
@@ -117,25 +130,17 @@ static struct {
 static GX2ColorBuffer color_buffer[8];
 static GX2DepthBuffer depth_buffer;
 
-void GX2SetViewport_wrap(float x, float y, float width, float height, float nearZ, float farZ, const char *function, int line, const char *file)
-{
-	GX2_CALL_CHECKED(GX2SetViewport, "%f,%f,%f,%f,%f,%f", x, y, width, height, nearZ, farZ);
-}
-void GX2SetViewportReg_wrap(GX2ViewportReg *reg, const char *function, int line, const char *file)
-{
-	GX2_CALL_CHECKED(GX2SetViewportReg, "0x%08X", reg);
-}
-void GX2SetScissor_wrap(u32 x, u32 y, u32 width, u32 height, const char *function, int line, const char *file)
-{
+void GX2SetViewport_wrap(float x, float y, float width, float height, float nearZ, float farZ, const char *function, int line, const char *file) { GX2_CALL_CHECKED(GX2SetViewport, "%f,%f,%f,%f,%f,%f", x, y, width, height, nearZ, farZ); }
+void GX2SetViewportReg_wrap(GX2ViewportReg *reg, const char *function, int line, const char *file) { GX2_CALL_CHECKED(GX2SetViewportReg, "0x%08X", reg); }
+void GX2SetScissor_wrap(u32 x, u32 y, u32 width, u32 height, const char *function, int line, const char *file) {
 	scissor.left = x;
 	scissor.top = y;
 	scissor.width = width;
 	scissor.height = height;
 	GX2_CALL_CHECKED(GX2SetScissor, "%i,%i,%i,%i", x, y, width, height);
 }
-void GX2SetScissorReg_wrap(GX2ScissorReg *reg, const char *function, int line, const char *file)
-{
-	GX2GetScissorReg(reg, (u32*)&scissor.left, (u32*)&scissor.top, (u32*)&scissor.width, (u32*)&scissor.height);
+void GX2SetScissorReg_wrap(GX2ScissorReg *reg, const char *function, int line, const char *file) {
+	GX2GetScissorReg(reg, (u32 *)&scissor.left, (u32 *)&scissor.top, (u32 *)&scissor.width, (u32 *)&scissor.height);
 	if (dump_calls || failed)
 		printf("(%i,%i,%i,%i)", scissor.left, scissor.top, scissor.width, scissor.height);
 
@@ -151,8 +156,13 @@ void GX2SetDepthBuffer_wrap(GX2DepthBuffer *depthBuffer, const char *function, i
 	GX2_CALL_CHECKED(GX2SetDepthBuffer, "0x%08X", depthBuffer);
 }
 
-#define GX2_CHECK(cond) do{if(cond) return #cond;}while(0)
-const char* check_context() {
+#define GX2_CHECK(cond) \
+	do { \
+		if (!error && (cond)) \
+			error = #cond; \
+	} while (0)
+const char *check_context() {
+	const char* error = NULL;
 	GX2_CHECK(!color_buffer[0].surface.image);
 
 	bool depth_enabled = depth_buffer.surface.image; // TODO
@@ -167,7 +177,20 @@ const char* check_context() {
 	GX2_CHECK(color_buffer[0].surface.width < scissor.left + scissor.width);
 	GX2_CHECK(color_buffer[0].surface.height < scissor.top + scissor.height);
 
-	return NULL;
+	if(error)
+	{
+		DEBUG_VAR(color_buffer[0].surface.image);
+		DEBUG_INT(color_buffer[0].surface.width);
+		DEBUG_INT(color_buffer[0].surface.height);
+		DEBUG_VAR(depth_buffer.surface.image);
+		DEBUG_INT(depth_buffer.surface.width);
+		DEBUG_INT(depth_buffer.surface.height);
+		DEBUG_INT(scissor.left);
+		DEBUG_INT(scissor.top);
+		DEBUG_INT(scissor.width);
+		DEBUG_INT(scissor.height);
+	}
+	return error;
 }
 void GX2SetAttribBuffer_wrap(uint32_t index, uint32_t size, uint32_t stride, const void *buffer, const char *function, int line, const char *file) {
 	if (!is_valid_data_ptr(buffer, size))
@@ -189,13 +212,16 @@ void GX2SetAttribBuffer_wrap(uint32_t index, uint32_t size, uint32_t stride, con
 void GX2DrawEx_wrap(GX2PrimitiveMode mode, uint32_t count, uint32_t offset, uint32_t numInstances, const char *function, int line, const char *file) {
 	// check offset and offset + count.
 
-	const char* error = check_context();
-	if(error)
+	const char *error = check_context();
+	if (error)
 		GX2_SET_FAILED(error);
 
-	dump_floats(v_buffers[0].ptr, count / v_buffers[0].stride, v_buffers[0].stride);
+	if (dump_data || failed) {
+		dump_floats(v_buffers[0].ptr, count, v_buffers[0].stride);
+	}
+
 	GX2_CALL_CHECKED(GX2DrawEx, "%i, %u, %u, %u", mode, count, offset, numInstances);
-	GX2DrawDone();
+//	GX2DrawDone();
 }
 
 void GX2DrawIndexedEx_wrap(GX2PrimitiveMode mode, uint32_t count, GX2IndexType indexType, void *indices, uint32_t offset, uint32_t numInstances, const char *function, int line, const char *file) {
@@ -204,22 +230,24 @@ void GX2DrawIndexedEx_wrap(GX2PrimitiveMode mode, uint32_t count, GX2IndexType i
 	if (!is_MEM1(indices, size) && !is_MEM2_data(indices, size) && !is_Bucket(indices, size))
 		GX2_SET_FAILED("invalid buffer");
 
-	const char* error = check_context();
-	if(error)
+	const char *error = check_context();
+	if (error)
 		GX2_SET_FAILED(error);
 
 	// check offset and offset + count.
 
-	dump_floats(v_buffers[0].ptr, 4, v_buffers[0].stride);
-	int display_count = count;
-	if(display_count > 24)
-		display_count = 24;
-	if (indexType & 1) {
-		dump_ints(indices, 1, display_count * sizeof(int));
-	} else {
-		dump_shorts(indices, 1 , display_count * sizeof(short));
+	if (dump_data || failed) {
+		dump_floats(v_buffers[0].ptr, 4, v_buffers[0].stride);
+		int display_count = count;
+		if (display_count > 24)
+			display_count = 24;
+		if (indexType & 1) {
+			dump_ints(indices, 1, display_count * sizeof(int));
+		} else {
+			dump_shorts(indices, 1, display_count * sizeof(short));
+		}
 	}
 
 	GX2_CALL_CHECKED(GX2DrawIndexedEx, "%i, %u, %i, 0x%08X, %u, %u", mode, count, indexType, indices, offset, numInstances);
-	GX2DrawDone();
+//	GX2DrawDone();
 }

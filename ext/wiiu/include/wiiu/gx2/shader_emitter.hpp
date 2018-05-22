@@ -1,7 +1,9 @@
 #pragma once
 
 /* info :
+ * https://developer.amd.com/wordpress/media/2012/10/R600-R700-Evergreen_Assembly_Language_Format.pdf
  *	https://developer.amd.com/wordpress/media/2012/10/R700-Family_Instruction_Set_Architecture.pdf
+ * http://developer.amd.com/wordpress/media/2013/10/evergreen_3D_registers_v2.pdf
  * https://github.com/decaf-emu/decaf-emu */
 
 #include <vector>
@@ -427,13 +429,13 @@ protected:
    void checkCF(Mode newMode) {
       if (newMode == mode_)
          return;
+      size_t last = 0;
       switch (mode_) {
       case Mode::CF: break;
       case Mode::ALU: {
-         size_t last_alu = 0;
          if (patch_alu_.size())
-            last_alu = patch_alu_.back().addr + patch_alu_.back().cnt;
-         patch_alu_.push_back({ cf_.size(), last_alu, alu_.size() - last_alu, kCache[0], kCache[1] });
+            last = patch_alu_.back().addr + patch_alu_.back().cnt;
+         patch_alu_.push_back({ cf_.size(), last, alu_.size() - last, kCache[0], kCache[1] });
          cf_.push_back(0);
          kCache[0] = {};
          kCache[1] = {};
@@ -441,11 +443,11 @@ protected:
          break;
       }
       case Mode::TEX: {
-         size_t last_tex = 0;
          if (patch_tex_.size())
-            last_tex = patch_tex_.back().addr + patch_tex_.back().cnt;
-         patch_tex_.push_back({ cf_.size(), last_tex, (tex_.size() - last_tex) >> 1 });
+            last = patch_tex_.back().addr + patch_tex_.back().cnt;
+         patch_tex_.push_back({ cf_.size(), last, (tex_.size() - last) >> 1 });
          cf_.push_back(0);
+         break;
       }
       }
       mode_ = newMode;
@@ -563,7 +565,7 @@ protected:
       ALU_OP3(inst, dst, src0, src1, src2);
    }
    void ALU_OP2(ALU_OP2_INST inst, DstReg dst, SrcReg src0, SrcReg src1, ALU_OMOD omod) {
-      emitALU(ALU_WORD0(((src0.id) & ((1 << 13) - 1)), 0x0, src0.ch, 0x0, ((src1.id) & ((1 << 13) - 1)), 0x0, src1.ch,
+      emitALU(ALU_WORD0(src0.id, 0x0, src0.ch, 0x0, ((src1.id) & ((1 << 13) - 1)), 0x0, src1.ch,
                         0x0, 0x0, 0x0),
               ALU_WORD1_OP2(0x0, 0x0, 0x0, 0x0, dst.write_mask, omod, inst, 0x0, 0x0, dst.id, 0x0, dst.ch, 0x0));
    }

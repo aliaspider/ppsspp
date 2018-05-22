@@ -103,13 +103,13 @@ GX2Texture *DepalShaderCacheGX2::GetClutTexture(GEPaletteFormat clutFormat, cons
 		const u16 *src = (const u16 *)rawClut;
 		u16 *dst = (u16 *)tex->surface.image;
 		while (src < (u16 *)rawClut + texturePixels) {
-			*dst++ = __builtin_bswap16(*src++);
+			*dst++ = (*src++);
 		}
 	} else {
 		const u32 *src = (const u32 *)rawClut;
 		u32 *dst = (u32 *)tex->surface.image;
 		while (src < (u32 *)rawClut + texturePixels) {
-			*dst++ = __builtin_bswap32(*src++);
+			*dst++ = (*src++);
 		}
 	}
 	GX2Invalidate(GX2_INVALIDATE_MODE_CPU_TEXTURE, tex->surface.image, tex->surface.imageSize);

@@ -24,10 +24,12 @@
 #include <wiiu/os.h>
 #include <wiiu/sysapp.h>
 #include <wiiu/vpad.h>
+#include <wiiu/gx2.h>
 #include "exception_handler.h"
 
 /*	Settings */
-#define NUM_STACK_TRACE_LINES 5
+#define NUM_STACK_TRACE_LINES 30
+#define VISIBLE_STACK_TRACE_LINES 5
 
 /*	Externals
 	From the linker scripts.
@@ -98,7 +100,9 @@ static void disasm_printfcallback(const char* fmt, ...)
 
 static void print_and_abort()
 {
+//   GX2ResetGPU();
    puts(exception_msgbuf);
+   DEBUG_VAR(MEM2_avail());
 #if 1
    OSScreenInit();
 
@@ -120,6 +124,7 @@ static void print_and_abort()
    OSTime time = OSGetSystemTime();
    while (true)
    {
+      OSSleepTicks(ms_to_ticks(1));
       VPADStatus vpad = {};
       VPADReadError error = 0;
       VPADRead(0, &vpad, 1, &error);
@@ -134,7 +139,8 @@ static void print_and_abort()
 #else
    OSFatal(exception_msgbuf);
 #endif
-   abort();
+   __attribute__((noreturn)) void __shutdown_program(void);
+   __shutdown_program();
 }
 void exception_print_lineinfo(uint32_t addr)
 {
@@ -245,19 +251,20 @@ BOOL exception_cb(OSContext* ctx, OSExceptionType type, OSExceptionCallbackFn pr
       if ((unsigned int)p->lr != ctx->lr)
          exception_print_symbol(ctx->lr);
 
-      for (i = 0; i < NUM_STACK_TRACE_LINES && p->up; p = p->up, i++)
+      for (i = 0; i < VISIBLE_STACK_TRACE_LINES && p->up; p = p->up, i++)
          exception_print_symbol((unsigned int)p->lr);
    }
    else
       buf_add("Stack pointer invalid. Could not trace further.\n");
 
+   buf_add("MEM: 0x%08X/0x%08X/0x%08X\n", MEM1_avail(), MEM2_avail(), MEMBucket_avail());
    extern const char *PPSSPP_GIT_VERSION;
    buf_add("PPSSPP (%s)\n", PPSSPP_GIT_VERSION);
 
-   /* again */
-   for (; i < NUM_STACK_TRACE_LINES + 3; i++)
+   for (; i < VISIBLE_STACK_TRACE_LINES + 3; i++)
       buf_add("\n");
 
+   /* again */
    exception_print_lineinfo(ctx->srr0);
    if (ctx->gpr[1])
    {
@@ -373,10 +380,22 @@ void exception_print_symbol(uint32_t addr)
 void setup_os_exceptions(void)
 {
    exception_msgbuf = malloc(4096* 8);
+   *exception_msgbuf = '\0';
    previous_dsi_cb = OSSetExceptionCallback(OS_EXCEPTION_TYPE_DSI, exception_dsi_cb);
    previous_isi_cb = OSSetExceptionCallback(OS_EXCEPTION_TYPE_ISI, exception_isi_cb);
    previous_prog_cb = OSSetExceptionCallback(OS_EXCEPTION_TYPE_PROGRAM, exception_prog_cb);
    test_os_exceptions();
+}
+
+void deinit_os_exceptions(void)
+{
+   if(*exception_msgbuf)
+      print_and_abort();
+   free(exception_msgbuf);
+   exception_msgbuf = NULL;
+   OSSetExceptionCallback(OS_EXCEPTION_TYPE_DSI, previous_dsi_cb);
+   OSSetExceptionCallback(OS_EXCEPTION_TYPE_ISI, previous_isi_cb);
+   OSSetExceptionCallback(OS_EXCEPTION_TYPE_PROGRAM, previous_prog_cb);
 }
 
 /*	void test_os_exceptions(void)

@@ -30,8 +30,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <wiiu/os/mutex.h>
-//#include <wiiu/ios.h>
-#include "iosuhax.h"
+#include <iosuhax.h>
 
 typedef struct _fs_dev_private_t {
     char *mount_path;

@@ -23,6 +23,9 @@ a copy of the GCC Runtime Library Exception along with this program;
 see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 <http://www.gnu.org/licenses/>.  */
 
+#ifndef __wiiu__
+#include_next <bits/gthr.h>
+#else
 #ifndef _GLIBCXX_GCC_GTHR_H
 #define _GLIBCXX_GCC_GTHR_H
 
@@ -152,3 +155,4 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 #endif
 
 #endif /* ! _GLIBCXX_GCC_GTHR_H */
+#endif

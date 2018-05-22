@@ -6,6 +6,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#elif defined __wiiu__
+#include <wiiu/os/time.h>
+#include <unistd.h>
 #else
 #include <sys/time.h>
 #include <unistd.h>
@@ -32,7 +35,13 @@ double real_time_now() {
 	double elapsed = static_cast<double>(time.QuadPart - startTime.QuadPart);
 	return elapsed * frequencyMult;
 }
-
+#elif defined(__wiiu__)
+double real_time_now() {
+	static OSTime start;
+	if(!start)
+		start = OSGetSystemTime();
+	return (double)(OSGetSystemTime() - start) / (double) wiiu_timer_clock;
+}
 #else
 
 uint64_t _frequency = 0;

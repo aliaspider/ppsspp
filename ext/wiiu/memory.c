@@ -55,6 +55,10 @@ void memoryRelease(void)
     bucket_heap = NULL;
 }
 
+u32 MEM2_avail() { return MEMGetTotalFreeSizeForExpHeap(MEMGetBaseHeapHandle(MEM_BASE_HEAP_MEM2)); }
+u32 MEM1_avail() { return MEMGetTotalFreeSizeForExpHeap(mem1_heap); }
+u32 MEMBucket_avail() { return MEMGetTotalFreeSizeForExpHeap(bucket_heap); }
+
 void* _memalign_r(struct _reent *r, size_t alignment, size_t size)
 {
    return MEMAllocFromExpHeapEx(MEMGetBaseHeapHandle(MEM_BASE_HEAP_MEM2), size, alignment);

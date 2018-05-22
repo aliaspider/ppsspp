@@ -103,6 +103,7 @@ bool GX2GraphicsContext::Init() {
 
 	draw_ = Draw::T3DCreateGX2Context(ctx_state_, &color_buffer_, &depth_buffer_);
 	SetGPUBackend(GPUBackend::GX2);
+	GX2SetSwapInterval(0);
 	return draw_->CreatePresets();
 }
 
@@ -130,14 +131,15 @@ void GX2GraphicsContext::Shutdown() {
 	MEMBucket_free(drc_scan_buffer_);
 	drc_scan_buffer_ = nullptr;
 }
-
+#include "profiler/profiler.h"
 void GX2GraphicsContext::SwapBuffers() {
+	PROFILE_THIS_SCOPE("swap");
 	GX2DrawDone();
 	GX2CopyColorBufferToScanBuffer(&color_buffer_, GX2_SCAN_TARGET_DRC);
 	GX2CopyColorBufferToScanBuffer(&color_buffer_, GX2_SCAN_TARGET_TV);
 	GX2SwapScanBuffers();
 	GX2Flush();
-	GX2WaitForVsync();
+//	GX2WaitForVsync();
 	GX2WaitForFlip();
 	GX2SetContextState(ctx_state_);
 	GX2SetShaderMode(GX2_SHADER_MODE_UNIFORM_BLOCK);
