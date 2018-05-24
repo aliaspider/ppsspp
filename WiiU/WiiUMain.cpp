@@ -32,6 +32,7 @@ void System_SendMessage(const char *command, const char *parameter) {
 
 int main(int argc, char **argv) {
 	PROFILE_INIT();
+	PPCSetFpIEEEMode();
 
 	host = new WiiUHost();
 

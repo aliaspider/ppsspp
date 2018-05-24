@@ -59,7 +59,6 @@ add_library(wiiu STATIC
    ${WIIU_ROOT}/stubs.S
 
    ${WIIU_ROOT}/gthr-wup.cpp
-   ${WIIU_ROOT}/std/pread.c
    ${WIIU_ROOT}/std/condition_variable.cc
    ${WIIU_ROOT}/std/mutex.cc
    ${WIIU_ROOT}/std/thread.cc

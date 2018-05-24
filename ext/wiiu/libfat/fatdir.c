@@ -101,12 +101,6 @@ int _FAT_unlink_r (struct _reent *r, const char *path) {
 		return -1;
 	}
 
-	// Make sure we aren't trying to write to a read-only disc
-	if (partition->readOnly) {
-		r->_errno = EROFS;
-		return -1;
-	}
-
 	// Move the path pointer to the start of the actual path
 	if (strchr (path, ':') != NULL) {
 		path = strchr (path, ':') + 1;
@@ -117,6 +111,13 @@ int _FAT_unlink_r (struct _reent *r, const char *path) {
 	}
 
 	_FAT_lock(&partition->lock);
+
+	// Make sure we aren't trying to write to a read-only disc
+	if (partition->readOnly) {
+		_FAT_unlock(&partition->lock);
+		r->_errno = EROFS;
+		return -1;
+	}
 
 	// Search for the file on the disc
 	if (!_FAT_directory_entryFromPath (partition, &dirEntry, path, NULL)) {
@@ -465,16 +466,13 @@ int _FAT_statvfs_r (struct _reent *r, const char *path, struct statvfs *buf)
 
 	_FAT_lock(&partition->lock);
 
-	if(memcmp(&buf->f_flag, "SCAN", 4) == 0)
-	{
-		//Special command was given to sync the numberFreeCluster
-		_FAT_partition_createFSinfo(partition);
-	}
-
-	if(partition->filesysType == FS_FAT32)
+	if(partition->filesysType == FS_FAT32) {
+		// Sync FSinfo block
+		_FAT_partition_readFSinfo(partition);
 		freeClusterCount = partition->fat.numberFreeCluster;
-	else
+	} else {
 		freeClusterCount = _FAT_fat_freeClusterCount (partition);
+	}
 
 	// FAT clusters = POSIX blocks
 	buf->f_bsize = partition->bytesPerCluster;		// File system block size.

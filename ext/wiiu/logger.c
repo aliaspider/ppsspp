@@ -4,11 +4,12 @@
 #include <wiiu/os/debug.h>
 #include <wiiu/os/systeminfo.h>
 #include <wiiu/os/thread.h>
+#include <wiiu/os/mutex.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/iosupport.h>
 
-//#define PC_DEVELOPMENT_IP_ADDRESS "192.168.2.3"
+#define PC_DEVELOPMENT_IP_ADDRESS "192.168.2.3"
 
 #ifndef PC_DEVELOPMENT_TCP_PORT
 #define PC_DEVELOPMENT_TCP_PORT 4405
@@ -26,9 +27,9 @@ static devoptab_t dotab_stdout = {
 };
 
 static int wiiu_log_socket = -1;
-static volatile int wiiu_log_lock = 0;
-
+static OSMutex wiiu_log_mutex;
 static ssize_t wiiu_log_write(struct _reent *r, void *fd, const char *ptr, size_t len) {
+	OSLockMutex(&wiiu_log_mutex);
 	if (wiiu_log_socket < 0) {
 		if (ptr[len - 1] == '\n') {
 			if (len > 1)
@@ -37,11 +38,6 @@ static ssize_t wiiu_log_write(struct _reent *r, void *fd, const char *ptr, size_
 			OSConsoleWrite(ptr, len);
 		}
 	} else {
-		while (wiiu_log_lock)
-			OSSleepTicks(((248625000 / 4)) / 1000);
-
-		wiiu_log_lock = 1;
-
 		int ret;
 		int remaining = len;
 
@@ -55,24 +51,24 @@ static ssize_t wiiu_log_write(struct _reent *r, void *fd, const char *ptr, size_
 			remaining -= ret;
 			ptr += ret;
 		}
-
-		wiiu_log_lock = 0;
 	}
-
+	OSUnlockMutex(&wiiu_log_mutex);
 	return len;
 }
 
 void net_print_exp(const char *str) {
+	OSLockMutex(&wiiu_log_mutex);
 	if (wiiu_log_socket < 0)
 		OSConsoleWrite(str, strlen(str));
 	else
 		send(wiiu_log_socket, str, strlen(str), 0);
+	OSunlockMutex(&wiiu_log_mutex);
 }
 
 void wiiu_log_init(void) {
 #if defined(PC_DEVELOPMENT_IP_ADDRESS)
-	if (!OSIsHLE()) {
-		wiiu_log_lock = 0;
+	OSInitMutex(&wiiu_log_mutex);
+	if (!OSIsHLE()) {		
 		wiiu_log_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 		if (wiiu_log_socket < 0)
@@ -96,11 +92,14 @@ void wiiu_log_init(void) {
 }
 
 void wiiu_log_deinit(void) {
+	DEBUG_LINE();
 	fflush(stdout);
 	fflush(stderr);
+	OSLockMutex(&wiiu_log_mutex);
 
 	if (wiiu_log_socket >= 0) {
 		socketclose(wiiu_log_socket);
 		wiiu_log_socket = -1;
 	}
+	OSUnlockMutex(&wiiu_log_mutex);
 }

@@ -235,8 +235,8 @@ void DrawEngineGX2::ApplyDrawState(int prim) {
 		GX2BlendState *bs1 = blendCache_.Get(keys_.blend.value);
 		if (bs1 == nullptr) {
 			bs1 = new GX2BlendState;
-			GX2InitColorControlReg(&bs1->color, keys_.blend.logicOpEnable ? keys_.blend.logicOp : GX2_LOGIC_OP_COPY, keys_.blend.blendEnable, false, keys_.blend.colorWriteMask != 0);
-			GX2InitTargetChannelMasksReg(&bs1->mask, keys_.blend.colorWriteMask, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA, GX2_CHANNEL_MASK_RGBA);
+			GX2InitColorControlReg(&bs1->color, keys_.blend.logicOpEnable ? keys_.blend.logicOp : GX2_LOGIC_OP_COPY, keys_.blend.blendEnable ? 0xFF : 0x00, false, keys_.blend.colorWriteMask != 0);
+			GX2InitTargetChannelMasksReg(&bs1->mask, keys_.blend.colorWriteMask, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0);
 			GX2InitBlendControlReg(&bs1->blend, GX2_RENDER_TARGET_0, keys_.blend.srcColor, keys_.blend.destColor, keys_.blend.blendOpColor, keys_.blend.srcAlpha && keys_.blend.destAlpha, keys_.blend.srcAlpha, keys_.blend.destAlpha, keys_.blend.blendOpAlpha);
 			blendCache_.Insert(keys_.blend.value, bs1);
 		}

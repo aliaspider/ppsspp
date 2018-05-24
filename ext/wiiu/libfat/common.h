@@ -42,9 +42,9 @@
 
 // Platform specific includes
 #if   defined (__wiiu__)
+   #include <wiiu/types.h>
    #include <iosuhax_disc_interface.h>
    #include <wiiu/os/mutex.h>
-   #include <wiiu/types.h>
    typedef OSMutex mutex_t;
 #elif defined(__gamecube__) || defined (__wii__)
    #include <gctypes.h>
@@ -61,8 +61,8 @@
 
 // Platform specific options
 #if   defined (__wiiu__)
-   #define DEFAULT_CACHE_PAGES 4
-   #define DEFAULT_SECTORS_PAGE 64
+   #define DEFAULT_CACHE_PAGES 512
+   #define DEFAULT_SECTORS_PAGE 128
 //   #define USE_RTC_TIME
 #elif   defined (__wii__)
    #define DEFAULT_CACHE_PAGES 4

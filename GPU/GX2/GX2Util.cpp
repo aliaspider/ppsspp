@@ -22,10 +22,10 @@ GX2Sampler StockGX2::samplerPoint2DClamp;
 GX2Sampler StockGX2::samplerLinear2DClamp;
 
 void StockGX2::Init() {
-	GX2InitColorControlReg(&blendDisabledColorWrite, GX2_LOGIC_OP_COPY, GX2_DISABLE, GX2_DISABLE, GX2_ENABLE);
-	GX2InitColorControlReg(&blendColorDisabled, GX2_LOGIC_OP_COPY, GX2_DISABLE, GX2_DISABLE, GX2_DISABLE);
+	GX2InitColorControlReg(&blendDisabledColorWrite, GX2_LOGIC_OP_COPY, 0x00, GX2_DISABLE, GX2_ENABLE);
+	GX2InitColorControlReg(&blendColorDisabled, GX2_LOGIC_OP_COPY, 0x00, GX2_DISABLE, GX2_DISABLE);
 	for(int i = 0; i < countof(TargetChannelMasks); i++)
-		GX2InitTargetChannelMasksReg(TargetChannelMasks + i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i, (GX2ChannelMask)i);
+		GX2InitTargetChannelMasksReg(TargetChannelMasks + i, (GX2ChannelMask)i, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0);
 
 	GX2InitDepthStencilControlReg(&depthStencilDisabled, GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_FUNC_NEVER, GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_FUNC_NEVER, GX2_STENCIL_FUNCTION_KEEP, GX2_STENCIL_FUNCTION_KEEP, GX2_STENCIL_FUNCTION_KEEP, GX2_COMPARE_FUNC_NEVER, GX2_STENCIL_FUNCTION_KEEP, GX2_STENCIL_FUNCTION_KEEP, GX2_STENCIL_FUNCTION_KEEP);
 	GX2InitDepthStencilControlReg(&depthDisabledStencilWrite, GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_FUNC_ALWAYS, GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_FUNC_ALWAYS, GX2_STENCIL_FUNCTION_REPLACE, GX2_STENCIL_FUNCTION_REPLACE, GX2_STENCIL_FUNCTION_REPLACE, GX2_COMPARE_FUNC_ALWAYS, GX2_STENCIL_FUNCTION_REPLACE, GX2_STENCIL_FUNCTION_REPLACE, GX2_STENCIL_FUNCTION_REPLACE);

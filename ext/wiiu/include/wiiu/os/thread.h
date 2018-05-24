@@ -275,6 +275,9 @@ void OSYieldThread();
 void OSInitThreadQueue(OSThreadQueue *queue);
 void OSInitThreadQueueEx(OSThreadQueue *queue, void *parent);
 
+void PPCSetFpIEEEMode (void);
+void PPCSetFpNonIEEEMode (void);
+
 #ifdef __cplusplus
 }
 #endif

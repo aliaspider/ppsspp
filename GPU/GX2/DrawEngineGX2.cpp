@@ -134,17 +134,17 @@ struct DeclTypeInfo {
 };
 
 static const DeclTypeInfo VComp[] = {
-	{ GX2_COMP_SEL(_x, _y, _z, _w), GX2_ATTRIB_FORMAT_FLOAT_32_32_32_32 }, // DEC_NONE,
+	{ GX2_COMP_SEL(_0, _0, _0, _0), GX2_ATTRIB_FORMAT_FLOAT_32_32_32_32 }, // DEC_NONE,
 	{ GX2_COMP_SEL(_x, _0, _0, _1), GX2_ATTRIB_FORMAT_FLOAT_32 },          // DEC_FLOAT_1,
 	{ GX2_COMP_SEL(_x, _y, _0, _1), GX2_ATTRIB_FORMAT_FLOAT_32_32 },       // DEC_FLOAT_2,
 	{ GX2_COMP_SEL(_x, _y, _z, _1), GX2_ATTRIB_FORMAT_FLOAT_32_32_32 },    // DEC_FLOAT_3,
 	{ GX2_COMP_SEL(_x, _y, _z, _w), GX2_ATTRIB_FORMAT_FLOAT_32_32_32_32 }, // DEC_FLOAT_4,
 	{ GX2_COMP_SEL(_x, _y, _z, _1), GX2_ATTRIB_FORMAT_SNORM_8_8_8_8 },     // DEC_S8_3,
 	{ GX2_COMP_SEL(_x, _y, _z, _1), GX2_ATTRIB_FORMAT_SNORM_16_16_16_16 }, // DEC_S16_3,
-	{ GX2_COMP_SEL(_r, _0, _0, _1), GX2_ATTRIB_FORMAT_UNORM_8 },           // DEC_U8_1,
-	{ GX2_COMP_SEL(_r, _g, _0, _1), GX2_ATTRIB_FORMAT_UNORM_8_8 },         // DEC_U8_2,
-	{ GX2_COMP_SEL(_r, _g, _b, _1), GX2_ATTRIB_FORMAT_UNORM_8_8_8_8 },     // DEC_U8_3,
-	{ GX2_COMP_SEL(_a, _b, _g, _r), GX2_ATTRIB_FORMAT_UNORM_8_8_8_8 },     // DEC_U8_4,
+	{ GX2_COMP_SEL(_x, _0, _0, _1), GX2_ATTRIB_FORMAT_UNORM_8 },           // DEC_U8_1,
+	{ GX2_COMP_SEL(_x, _y, _0, _1), GX2_ATTRIB_FORMAT_UNORM_8_8 },         // DEC_U8_2,
+	{ GX2_COMP_SEL(_x, _y, _z, _1), GX2_ATTRIB_FORMAT_UNORM_8_8_8_8 },     // DEC_U8_3,
+	{ GX2_COMP_SEL(_x, _y, _z, _w), GX2_ATTRIB_FORMAT_UNORM_8_8_8_8 },     // DEC_U8_4,
 	{ GX2_COMP_SEL(_x, _0, _0, _1), GX2_ATTRIB_FORMAT_UNORM_16 },          // DEC_U16_1,
 	{ GX2_COMP_SEL(_x, _y, _0, _1), GX2_ATTRIB_FORMAT_UNORM_16_16 },       // DEC_U16_2,
 	{ GX2_COMP_SEL(_x, _y, _z, _1), GX2_ATTRIB_FORMAT_UNORM_16_16_16_16 }, // DEC_U16_3,
