@@ -611,7 +611,7 @@ namespace PpcGen {
 
 	
 	void PPCXEmitter::MOVI2F	(PPCReg dest, float imm, bool negate) {
-		u32 tmp;
+		static u32 tmp;
 
 		union convert { 
 			unsigned int i; 
@@ -636,8 +636,8 @@ namespace PpcGen {
 	
 	void PPCXEmitter::SaveFloatSwap(PPCReg FRt, PPCReg Base, PPCReg offset) {
 		// used for swapping float ...
-		// TODO: this can't be right. storing the address of a temporary ?
-		u32 tmp;
+		// TODO: maybe just use the stack ?
+		static u32 tmp;
 
 		// Save Value in tmp	
 		MOVI2R(R7, (uintptr_t)&tmp);
@@ -652,7 +652,7 @@ namespace PpcGen {
 
 	void PPCXEmitter::LoadFloatSwap(PPCReg FRt, PPCReg Base, PPCReg offset) {
 		// used for swapping float ...
-		u32 tmp;
+		static u32 tmp;
 		
 		// Load Value into a temp REG
 		LWBRX(R6, Base, offset); 

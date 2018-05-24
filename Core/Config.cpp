@@ -310,7 +310,7 @@ static int DefaultNumWorkers() {
 }
 
 static int DefaultCpuCore() {
-#if defined(ARM) || defined(ARM64) || defined(_M_IX86) || defined(_M_X64)
+#if defined(ARM) || defined(ARM64) || defined(_M_IX86) || defined(_M_X64) || defined(__PPC__)
 	return (int)CPUCore::JIT;
 #else
 	return (int)CPUCore::INTERPRETER;
@@ -443,7 +443,7 @@ static int DefaultInternalResolution() {
 }
 
 static bool DefaultFrameskipUnthrottle() {
-#if !PPSSPP_PLATFORM(WINDOWS) || PPSSPP_PLATFORM(UWP)
+#if (!PPSSPP_PLATFORM(WINDOWS) && !PPSSPP_PLATFORM(WIIU)) || PPSSPP_PLATFORM(UWP)
 	return true;
 #else
 	return false;

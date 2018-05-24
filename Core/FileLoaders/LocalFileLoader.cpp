@@ -126,6 +126,10 @@ size_t LocalFileLoader::ReadAt(s64 absolutePos, size_t bytes, size_t count, void
 		lseek64(fd_, absolutePos, SEEK_SET);
 		return read(fd_, data, bytes * count) / bytes;
 	}
+#elif defined(__wiiu__)
+	std::lock_guard<std::mutex> guard(readLock_);
+	lseek(fd_, absolutePos, SEEK_SET);
+	return read(fd_, data, bytes * count) / bytes;
 #elif !defined(_WIN32)
 #if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS < 64
 	return pread64(fd_, data, bytes * count, absolutePos) / bytes;
